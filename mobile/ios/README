@@ -20,20 +20,20 @@ COMPONENTS
 Components that are exposed by your module must follow a special naming convention.
 A component (widget, proxy, etc) must be named with the pattern:
 
-	Ti<ModuleName><ComponentName>Proxy
+    Ti<ModuleName><ComponentName>Proxy
 
 For example, if you component was called Foo, your proxy would be named:
 
-	TiMyfirstFooProxy
-	
+    TiMyfirstFooProxy
+    
 For view proxies or widgets, you must create both a view proxy and a view implementation. 
 If you widget was named proxy, you would create the following files:
 
-	TiMyfirstFooProxy.h
-	TiMyfirstFooProxy.m
-	TiMyfirstFoo.h
-	TiMyfirstFoo.m
-	
+    TiMyfirstFooProxy.h
+    TiMyfirstFooProxy.m
+    TiMyfirstFoo.h
+    TiMyfirstFoo.m
+    
 The view implementation is named the same except it does contain the suffix `Proxy`.  
 
 View implementations extend the Titanium base class `TiUIView`.  View Proxies extend the
@@ -94,7 +94,7 @@ Register your module with your application by editing `tiapp.xml` and adding you
 Example:
 
 <modules>
-	<module version="0.1">ti.mobileapptracker</module>
+    <module version="0.1">ti.mobileapptracker</module>
 </modules>
 
 When you run your project, the compiler will know automatically compile in your module
@@ -107,8 +107,8 @@ To use your module in code, you will need to require it.
 
 For example,
 
-	var my_module = require('ti.mobileapptracker');
-	my_module.foo();
+    var my_module = require('ti.mobileapptracker');
+    my_module.foo();
 
 WRITING PURE JS NATIVE MODULES
 ------------------------------
@@ -119,11 +119,11 @@ want to distribute a JS module pre-compiled.
 To create a module, create a file named ti.mobileapptracker.js under the assets folder.
 This file must be in the Common JS format.  For example:
 
-	exports.echo = function(s)
-	{
-		return s;
-	};
-	
+    exports.echo = function(s)
+    {
+        return s;
+    };
+    
 Any functions and properties that are exported will be made available as part of your
 module.  All other code inside your JS will be private to your module.
 
@@ -136,8 +136,8 @@ TESTING YOUR MODULE
 Run the `titanium.py` script to test your module or test from within XCode.
 To test with the script, execute:
 
-	titanium run --dir=YOURMODULEDIR
-	
+    titanium run --dir=YOURMODULEDIR
+    
 
 This will execute the app.js in the example folder as a Titanium application.
 

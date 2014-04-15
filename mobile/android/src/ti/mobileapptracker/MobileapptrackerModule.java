@@ -40,53 +40,62 @@ public class MobileapptrackerModule extends KrollModule {
     
     @Kroll.method
     public void initTracker(String advId, String convKey) {
-        mat = new MobileAppTracker(getActivity(), advId, convKey);
+        
+        MobileAppTracker.init(getActivity(), advId, convKey);
+        
+        mat = MobileAppTracker.getInstance();
+        
+        mat.setPluginName("titanium");
     }
     
     @Kroll.method
-    public void trackInstall() {
-        mat.trackInstall();
+    public void measureSession() {
+        mat.measureSession();
     }
     
     @Kroll.method
-    public void trackUpdate() {
-        mat.trackUpdate();
+    public void measureAction(String eventIdOrName) {
+        mat.measureAction(eventIdOrName);
     }
     
     @Kroll.method
-    public void trackInstallWithReferenceId(String refId) {
-        mat.setRefId(refId);
-        mat.trackInstall();
+    public void measureAction(String eventIdOrName, String refId) {
+        mat.measureAction(eventIdOrName, 0, null, refId);
     }
     
     @Kroll.method
-    public void trackUpdateWithReferenceId(String refId) {
-        mat.setRefId(refId);
-        mat.trackUpdate();
+    public void measureAction(String eventIdOrName, double revenue, String currency) {
+        mat.measureAction(eventIdOrName, revenue, currency);
     }
     
     @Kroll.method
-    public void trackAction(String eventIdOrName, boolean isId, String refId, double revenue, String currency) {
-        mat.trackAction(eventIdOrName, revenue, currency, refId);
+    public void measureAction(String eventIdOrName, String refId, double revenue, String currency) {
+        mat.measureAction(eventIdOrName, revenue, currency, refId);
     }
     
     @Kroll.method
-    public void trackActionWithItems(String eventIdOrName, boolean isId, Object[] items, String refId, double revenueAmount, String currencyCode) {
-        trackActionWithReceipt(eventIdOrName, isId, items, refId, revenueAmount, currencyCode, 0, null, null);
+    public void measureActionWithItems(String eventIdOrName, Object[] items) {
+        measureActionWithReceipt(eventIdOrName, items, null, 0, null, 0, null, null);
     }
     
     @Kroll.method
-    public void trackActionWithReceipt(String eventIdOrName, boolean isId, Object[] items, String refId, double revenueAmount, String currencyCode, int transactionState, String receipt, String receiptSignature) {	
+    public void measureActionWithItems(String eventIdOrName, Object[] items, String refId) {
+        measureActionWithReceipt(eventIdOrName, items, refId, 0, null, 0, null, null);
+    }
+    
+    @Kroll.method
+    public void measureActionWithItems(String eventIdOrName, Object[] items, String refId, double revenueAmount, String currencyCode) {
+        measureActionWithReceipt(eventIdOrName, items, refId, revenueAmount, currencyCode, 0, null, null);
+    }
+    
+    @Kroll.method
+    public void measureActionWithReceipt(String eventIdOrName, Object[] items, String refId, double revenueAmount, String currencyCode, int transactionState, String receipt, String receiptSignature) {    
         List<MATEventItem> listItems = convertToMATEventItems(items);
         
-        mat.setCurrencyCode(currencyCode);
-        mat.setRefId(refId);
-        mat.setRevenue(revenueAmount);
-        
-        if (receiptSignature != null && receiptSignature.length() > 0) {
-            mat.trackAction(eventIdOrName, listItems, receipt, receiptSignature);
+        if (receiptSignature != null && !receiptSignature.isEmpty()) {
+            mat.measureAction(eventIdOrName, listItems, revenueAmount, currencyCode, refId, receipt, receiptSignature);
         } else {
-            mat.trackAction(eventIdOrName, listItems);
+            mat.measureAction(eventIdOrName, listItems, revenueAmount, currencyCode, refId);
         }
     }
     
@@ -101,8 +110,8 @@ public class MobileapptrackerModule extends KrollModule {
     }
     
     @Kroll.method
-    public void setAppAdTracking(boolean enable) {
-        mat.setAppAdTracking(enable);
+    public void setAppAdTracking(boolean allowAdTracking) {
+        mat.setAppAdTrackingEnabled(allowAdTracking);
     }
     
     @Kroll.method
@@ -116,8 +125,18 @@ public class MobileapptrackerModule extends KrollModule {
     }
     
     @Kroll.method
+    public void setExistingUser(boolean existing) {
+        mat.setExistingUser(existing);
+    }
+    
+    @Kroll.method
+    public void setPayingUser(boolean paying) {
+        mat.setIsPayingUser(paying);
+    }
+    
+    @Kroll.method
     public void setGender(int gender) {
-        mat.setGender(1 == gender ? MobileAppTracker.GENDER_FEMALE : MobileAppTracker.GENDER_MALE);
+        mat.setGender(MobileAppTracker.GENDER_FEMALE == gender ? MobileAppTracker.GENDER_FEMALE : MobileAppTracker.GENDER_MALE);
     }
     
     @Kroll.method
@@ -134,23 +153,8 @@ public class MobileapptrackerModule extends KrollModule {
     }
     
     @Kroll.method
-    public void setMATAdvertiserId(String matAdvertiserId) {
-        mat.setAdvertiserId(matAdvertiserId);
-    }
-    
-    @Kroll.method
-    public void setMATConversionKey(String matConversionKey) {
-        mat.setKey(matConversionKey);
-    }
-    
-    @Kroll.method
     public void setPackageName(String packageName) {
         mat.setPackageName(packageName);
-    }
-    
-    @Kroll.method
-    public void setRevenue(double revenue) {
-        mat.setRevenue(revenue);
     }
     
     @Kroll.method
@@ -159,33 +163,92 @@ public class MobileapptrackerModule extends KrollModule {
     }
     
     @Kroll.method
-    public void setTrusteTPID(String tpid) {
-        mat.setTRUSTeId(tpid);
-    }
-    
-    @Kroll.method
     public void setUserId(String userId) {
         mat.setUserId(userId);
     }
     
+    @Kroll.method
+    public void setUserEmail(String user_email) {
+        mat.setUserEmail(user_email);
+    }
+    
+    @Kroll.method
+    public void setUserName(String user_name) {
+        mat.setUserName(user_name);
+    }
+
+    @Kroll.method
+    public void setFacebookUserId(String facebookUserId) {
+        mat.setFacebookUserId(facebookUserId);
+    }
+
+    @Kroll.method
+    public void setTwitterUserId(String twitterUserId) {
+        mat.setTwitterUserId(twitterUserId);
+    }
+
+    @Kroll.method
+    public void setGoogleUserId(String googleUserId) {
+        mat.setGoogleUserId(googleUserId);
+    }
+    
+    @Kroll.method
+    public void setGoogleAdvertisingId(String adId, boolean isLATEnabled) {
+        mat.setGoogleAdvertisingId(adId, isLATEnabled);
+    }
+    
+    @Kroll.method
+    public void setEventAttribute1(String attr) {
+        mat.setEventAttribute1(attr);
+    }
+    
+    @Kroll.method
+    public void setEventAttribute2(String attr) {
+        mat.setEventAttribute2(attr);
+    }
+    
+    @Kroll.method
+    public void setEventAttribute3(String attr) {
+        mat.setEventAttribute3(attr);
+    }
+    
+    @Kroll.method
+    public void setEventAttribute4(String attr) {
+        mat.setEventAttribute4(attr);
+    }
+    
+    @Kroll.method
+    public void setEventAttribute5(String attr) {
+        mat.setEventAttribute5(attr);
+    }
+
     @Kroll.method
     public void startAppToAppTracking(String targetAppId, String advertiserId, String offerId, String publisherId, boolean shouldRedirect) {
         mat.setTracking(advertiserId, targetAppId, publisherId, offerId, shouldRedirect);
     }
     
     /////////////////////////////////
-    // Android no-op methods
+    // Getter methods
     /////////////////////////////////
     
     @Kroll.method
-    public void setOpenUDID(String openUDID) {
-        // no-op
+    public String getMatId() {
+        return mat.getMatId();
     }
     
     @Kroll.method
-    public void setUIID(String uiid) {
-        // no-op
+    public String getOpenLogId() {
+        return mat.getOpenLogId();
     }
+    
+    @Kroll.method
+    public boolean getIsPayingUser() {
+        return mat.getIsPayingUser();
+    }
+    
+    /////////////////////////////////
+    // Android no-op methods
+    /////////////////////////////////
     
     @Kroll.method
     public void setDelegate(boolean enable) {
@@ -203,16 +266,6 @@ public class MobileapptrackerModule extends KrollModule {
     }
     
     @Kroll.method
-    public void setMACAddress(String mac) {
-        // no-op
-    }
-    
-    @Kroll.method
-    public void setODIN1(String odin1) {
-        // no-op
-    }
-    
-    @Kroll.method
     public void setUseCookieTracking(boolean useCookieTracking) {
         // no-op
     }
@@ -223,7 +276,12 @@ public class MobileapptrackerModule extends KrollModule {
     }
     
     @Kroll.method
-    public void setAppleAdvertisingIdentifier(String advertiserId) {
+    public void setTRUSTeId(String tpid) {
+        // no-op
+    }
+    
+    @Kroll.method
+    public void setAppleAdvertisingIdentifier(String advertiserId, boolean trackingEnabled) {
         // no-op
     }
     
@@ -234,16 +292,6 @@ public class MobileapptrackerModule extends KrollModule {
     
     @Kroll.method
     public void setShouldAutoGenerateAppleVendorIdentifier(boolean shouldAutoGenerate) {
-        // no-op
-    }
-    
-    @Kroll.method
-    public void setShouldAutoGenerateAppleAdvertisingIdentifier(boolean shouldAutoGenerate) {
-        // no-op
-    }
-    
-    @Kroll.method
-    public void printSDKDataParameters() {
         // no-op
     }
     
