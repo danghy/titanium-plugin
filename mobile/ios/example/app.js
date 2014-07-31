@@ -138,6 +138,16 @@ button.addEventListener('click',function(e) {
     mat.setEventAttribute3("attr3");
     mat.setEventAttribute4("attr4");
     mat.setEventAttribute5("attr5");
+    
+    mat.setEventContentType("testContentType");
+    mat.setEventContentId("testContentId");
+    mat.setEventDate1(new Date().toISOString ());
+    mat.setEventDate2(new Date().toISOString ());
+    mat.setEventLevel(0);
+    mat.setEventQuantity(0);
+    mat.setEventRating(4.5);
+    mat.setEventSearchString("testSearchString");
+    
     mat.setExistingUser(false);
     mat.setFacebookUserId("tempFacebookId");
     mat.setGender(1);

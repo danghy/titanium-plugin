@@ -33,7 +33,7 @@
     // you *must* call the superclass
     [super startup];
     
-    NSLog(@"[INFO] %@ loaded",self);
+    NSLog(@"[INFO] TIMATModule: %@ loaded",self);
 }
 
 -(void)shutdown:(id)sender
@@ -89,7 +89,7 @@
 - (void)initTracker:(id)args
 {
     NSArray *arr = args;
-    NSLog(@"[INFO] initTracker: arr  = %@", arr);
+    NSLog(@"[INFO] TIMATModule: initTracker: arr  = %@", arr);
     
     NSString *aid = [arr objectAtIndex:0];
     NSString *key = [arr objectAtIndex:1];
@@ -101,28 +101,28 @@
 
 - (void)setPackageName:(id)packageName
 {
-    NSLog(@"[INFO] setPackageName")
+    NSLog(@"[INFO] TIMATModule: setPackageName")
     
     [MobileAppTracker setPackageName:packageName];
 }
 
 - (void)setDebugMode:(id)enable
 {
-    NSLog(@"[INFO] setDebugMode")
+    NSLog(@"[INFO] TIMATModule: setDebugMode")
     
     [MobileAppTracker setDebugMode:[TiUtils boolValue:enable]];
 }
 
 - (void)setAllowDuplicates:(id)enable
 {
-    NSLog(@"[INFO] setAllowDuplicates")
+    NSLog(@"[INFO] TIMATModule: setAllowDuplicates")
     
     [MobileAppTracker setAllowDuplicateRequests:[TiUtils boolValue:enable]];
 }
 
 - (void)setDelegate:(id)enable
 {
-    NSLog(@"[INFO] setDelegate")
+    NSLog(@"[INFO] TIMATModule: setDelegate")
     
     id<MobileAppTrackerDelegate> dele = [TiUtils boolValue:enable] ? self : nil;
     
@@ -131,18 +131,18 @@
 
 - (void)measureSession:(id)dummy
 {
-    NSLog(@"[INFO] measureSession")
+    NSLog(@"[INFO] TIMATModule: measureSession")
     
     [MobileAppTracker measureSession];
 }
 
 - (void)measureAction:(id)args
 {
-    NSLog(@"[INFO] measureAction")
+    NSLog(@"[INFO] TIMATModule: measureAction")
     
     NSArray *arr = args;
     
-    int paramCount = arr ? [arr count] : 0;
+    NSInteger paramCount = arr ? [arr count] : 0;
     
     if(paramCount > 0)
     {
@@ -180,7 +180,7 @@
     
     NSArray *arr = args;
     
-    int paramCount = arr ? [arr count] : 0;
+    NSInteger paramCount = arr ? [arr count] : 0;
     
     if(paramCount > 0)
     {
@@ -493,6 +493,66 @@
     [MobileAppTracker setEventAttribute5:attr];
 }
 
+- (void)setEventContentType:(id)contentType
+{
+    NSLog(@"[INFO] TIMATModule: setEventContentType");
+    
+    [MobileAppTracker setEventContentType:contentType];
+}
+
+- (void)setEventContentId:(id)contentId
+{
+    NSLog(@"[INFO] TIMATModule: setEventContentId");
+    
+    [MobileAppTracker setEventContentId:contentId];
+}
+
+- (void)setEventDate1:(id)dateString
+{
+    NSLog(@"[INFO] TIMATModule: setEventDate1");
+    
+    NSDate* date = [dateFormatter() dateFromString:dateString];
+    
+    [MobileAppTracker setEventDate1:date];
+}
+
+- (void)setEventDate2:(id)dateString
+{
+    NSLog(@"[INFO] TIMATModule: setEventDate2");
+    
+    NSDate* date = [dateFormatter() dateFromString:dateString];
+    
+    [MobileAppTracker setEventDate2:date];
+}
+
+- (void)setEventLevel:(id)level
+{
+    NSLog(@"[INFO] TIMATModule: setLevel");
+    
+    [MobileAppTracker setEventLevel:[level intValue]];
+}
+
+- (void)setEventQuantity:(id)quantity
+{
+    NSLog(@"[INFO] TIMATModule: setEventQuantity");
+    
+    [MobileAppTracker setEventQuantity:[quantity intValue]];
+}
+
+- (void)setEventRating:(id)rating
+{
+    NSLog(@"[INFO] TIMATModule: setRating");
+    
+    [MobileAppTracker setEventRating:[rating floatValue]];
+}
+
+- (void)setEventSearchString:(id)searchString
+{
+    NSLog(@"[INFO] TIMATModule: setEventSearchString");
+    
+    [MobileAppTracker setEventSearchString:searchString];
+}
+
 - (void)setGoogleAdvertisingId:(id)advId
 {
     // Android only method, no-op on iOS
@@ -604,6 +664,25 @@
     }
     
     return arrItems;
+}
+
+static const char * MAT_DATE_TIME_FORMAT = "yyyy'-'MM'-'dd'T'HH':'mm':'ss'.'SSS'Z'"; // ISO 8601 Extended Format (always UTC) -- http://www.w3schools.com/jsref/jsref_toisostring.asp
+
+NSDateFormatter* dateFormatter()
+{
+    static NSDateFormatter* sharedDateFormatter = nil;
+    
+    if(nil == sharedDateFormatter)
+    {
+        sharedDateFormatter = [[NSDateFormatter alloc] init];
+        NSLocale *enUSPOSIXLocale = [[NSLocale alloc] initWithLocaleIdentifier:@"en_US_POSIX"];
+        
+        [sharedDateFormatter setLocale:enUSPOSIXLocale];
+        [sharedDateFormatter setDateFormat:[NSString stringWithUTF8String:MAT_DATE_TIME_FORMAT]];
+        [sharedDateFormatter setTimeZone:[NSTimeZone timeZoneForSecondsFromGMT:0]];
+    }
+    
+    return sharedDateFormatter;
 }
 
 #pragma mark - MobileAppTrackerDelegate Methods

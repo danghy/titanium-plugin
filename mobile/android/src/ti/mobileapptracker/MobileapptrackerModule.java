@@ -8,9 +8,14 @@
  */
 package ti.mobileapptracker;
 
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.List;
+import java.util.Locale;
+import java.util.SimpleTimeZone;
 
 import org.appcelerator.kroll.KrollModule;
 import org.appcelerator.kroll.annotations.Kroll;
@@ -28,6 +33,8 @@ public class MobileapptrackerModule extends KrollModule {
     // @Kroll.constant public static final String EXTERNAL_NAME = value;
     
     private static MobileAppTracker mat = null;
+    
+    private final String MAT_DATE_TIME_FORMAT = "yyyy'-'MM'-'dd'T'HH':'mm':'ss'.'SSS'Z'"; // ISO 8601 Extended Format (always UTC) -- http://www.w3schools.com/jsref/jsref_toisostring.asp
     
     public MobileapptrackerModule() {
         super();
@@ -221,10 +228,71 @@ public class MobileapptrackerModule extends KrollModule {
     public void setEventAttribute5(String attr) {
         mat.setEventAttribute5(attr);
     }
+    
+    @Kroll.method
+    public void setEventContentId(String contentId) {
+        
+        mat.setEventContentId(contentId);
+    }
+    
+    @Kroll.method
+    public void setEventContentType(String contentType) {
+        mat.setEventContentType(contentType);
+    }
+    
+    @Kroll.method
+    public void setEventDate1(String dateString) {
+        
+        SimpleDateFormat sdf = new SimpleDateFormat(MAT_DATE_TIME_FORMAT, Locale.ENGLISH);
+        sdf.setTimeZone(new SimpleTimeZone(SimpleTimeZone.UTC_TIME, "UTC"));
+        
+        Date date;
+        
+        try {
+            date = sdf.parse(dateString);
+            
+            mat.setEventDate1(date);
+        } catch (ParseException e) {
+            e.printStackTrace();
+        }
+    }
+    
+    @Kroll.method
+    public void setEventDate2(String dateString) {
+        
+        SimpleDateFormat sdf = new SimpleDateFormat(MAT_DATE_TIME_FORMAT, Locale.ENGLISH);
+        sdf.setTimeZone(new SimpleTimeZone(SimpleTimeZone.UTC_TIME, "UTC"));
+        
+        Date date;
+        
+        try {
+            date = sdf.parse(dateString);
+            
+            mat.setEventDate2(date);
+        } catch (ParseException e) {
+            e.printStackTrace();
+        }
+    }
+    
+    @Kroll.method
+    public void setEventLevel(int level) {
+        mat.setEventLevel(level);
+    }
+    
+    @Kroll.method
+    public void setEventQuantity(int quantity) {
+        
+        mat.setEventQuantity(quantity);
+    }
+    
+    @Kroll.method
+    public void setEventRating(int rating) {
+        mat.setEventRating(rating);
+    }
 
     @Kroll.method
-    public void startAppToAppTracking(String targetAppId, String advertiserId, String offerId, String publisherId, boolean shouldRedirect) {
-        mat.setTracking(advertiserId, targetAppId, publisherId, offerId, shouldRedirect);
+    public void setEventSearchString(String searchString) {
+        mat.setEventSearchString(searchString);
     }
     
     /////////////////////////////////

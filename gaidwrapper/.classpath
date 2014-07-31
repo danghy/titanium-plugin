@@ -3,16 +3,16 @@
 	<classpathentry kind="src" path="src"/>
 	<classpathentry kind="src" path="build/.apt_generated"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
-	<classpathentry kind="lib" path="/home/johng/tools/android-sdk-linux/platforms/android-10/android.jar"/>
-	<classpathentry kind="lib" path="/home/johng/tools/android-sdk-linux/add-ons/addon-google_apis-google_inc_-10/libs/maps.jar"/>
-	<classpathentry kind="lib" path="/home/johng/.titanium/mobilesdk/linux/3.3.0.v20140404095717/android/titanium.jar"/>
-	<classpathentry kind="lib" path="/home/johng/.titanium/mobilesdk/linux/3.3.0.v20140404095717/android/kroll-common.jar"/>
-	<classpathentry kind="lib" path="/home/johng/.titanium/mobilesdk/linux/3.3.0.v20140404095717/android/kroll-apt.jar"/>
 	<classpathentry kind="src" path=".apt_generated">
 		<attributes>
 			<attribute name="optional" value="true"/>
 		</attributes>
 	</classpathentry>
-	<classpathentry kind="lib" path="/home/johng/Dev/google-play-services_lib/libs/google-play-services.jar"/>
+	<classpathentry kind="lib" path="/home/john-gu/.titanium/mobilesdk/linux/3.3.0.GA/android/kroll-apt.jar"/>
+	<classpathentry kind="lib" path="/home/john-gu/.titanium/mobilesdk/linux/3.3.0.GA/android/kroll-common.jar"/>
+	<classpathentry kind="lib" path="/home/john-gu/.titanium/mobilesdk/linux/3.3.0.GA/android/titanium.jar"/>
+	<classpathentry kind="lib" path="/home/john-gu/tools/android-sdk/platforms/android-10/android.jar"/>
+	<classpathentry kind="lib" path="/home/john-gu/tools/android-sdk/add-ons/addon-google_apis-google-10/libs/maps.jar"/>
+	<classpathentry kind="lib" path="/home/john-gu/Dev/sdk/sdk-titanium/gaidwrapper/lib/google-play-services.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

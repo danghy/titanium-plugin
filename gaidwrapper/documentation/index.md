@@ -8,9 +8,9 @@ TODO: Enter your module description here
 
 To access this module from JavaScript, you would do the following:
 
-	var gaidwrapper = require("com.hasoffers.gaidwrapper");
+    var gaidwrapper = require("com.hasoffers.gaidwrapper");
 
-The gaidwrapper variable is a reference to the Module object.	
+The gaidwrapper variable is a reference to the Module object.    
 
 ## Reference
 

@@ -27,34 +27,34 @@ import com.google.android.gms.common.GooglePlayServicesRepairableException;
 @Kroll.module(name="Gaidwrapper", id="com.hasoffers.gaidwrapper")
 public class GaidwrapperModule extends KrollModule
 {
-	// Standard Debugging variables
-	private static final String TAG = "GaidwrapperModule";
-	
-	// You can define constants with @Kroll.constant, for example:
-	// @Kroll.constant public static final String EXTERNAL_NAME = value;
-	
-	public GaidwrapperModule()
-	{
-		super();
-	}
+    // Standard Debugging variables
+    private static final String TAG = "GaidwrapperModule";
+    
+    // You can define constants with @Kroll.constant, for example:
+    // @Kroll.constant public static final String EXTERNAL_NAME = value;
+    
+    public GaidwrapperModule()
+    {
+        super();
+    }
 
-	@Kroll.onAppCreate
-	public static void onAppCreate(TiApplication app)
-	{
-		Log.d(TAG, "inside onAppCreate");
-		// put module init code that needs to run when the application is created
-	}
+    @Kroll.onAppCreate
+    public static void onAppCreate(TiApplication app)
+    {
+        Log.d(TAG, "inside onAppCreate");
+        // put module init code that needs to run when the application is created
+    }
 
-	// Methods
-	@Kroll.method
-	public void getGoogleAdvertisingId(KrollFunction callback)
-	{
-		Log.d(TAG, "getGoogleAdvertisingId called");
-		new Thread(new GetGAIDThread(TiApplication.getInstance(), callback)).start();
-		return;
-	}
-	
-	class GetGAIDThread implements Runnable {
+    // Methods
+    @Kroll.method
+    public void getGoogleAdvertisingId(KrollFunction callback)
+    {
+        Log.d(TAG, "getGoogleAdvertisingId called");
+        new Thread(new GetGAIDThread(TiApplication.getInstance(), callback)).start();
+        return;
+    }
+    
+    class GetGAIDThread implements Runnable {
         Context mContext;
         KrollFunction mCallback;
         
@@ -63,6 +63,7 @@ public class GaidwrapperModule extends KrollModule
             this.mCallback = callback;
         }
         
+        @Override
         public void run() {
             try {
                 Info adInfo = AdvertisingIdClient.getAdvertisingIdInfo(mContext);

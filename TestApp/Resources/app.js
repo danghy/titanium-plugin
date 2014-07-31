@@ -43,8 +43,8 @@ if(isiOS)
 var gaidwrapper = null;
 if (isAndroid)
 {
-	gaidwrapper = require('com.hasoffers.gaidwrapper');
-	Ti.API.info("module is => " + gaidwrapper);
+    gaidwrapper = require('com.hasoffers.gaidwrapper');
+    Ti.API.info("module is => " + gaidwrapper);
 }
 
 var button = Titanium.UI.createButton({ title: 'Start MAT', top: 45, width: Ti.UI.FILL, height: 200, borderWidth:1, borderRadius:8 });
@@ -61,9 +61,9 @@ button.addEventListener('click',function(e) {
     }
     if (isAndroid)
     {
-    	gaidwrapper.getGoogleAdvertisingId(function(result) {
-    		mat.setGoogleAdvertisingId(result['gaid'], result['isLAT']);
-    	});   	
+        gaidwrapper.getGoogleAdvertisingId(function(result) {
+            mat.setGoogleAdvertisingId(result['gaid'], result['isLAT']);
+        });
     }
     mat.setDelegate(true);
 });
@@ -182,6 +182,16 @@ button.addEventListener('click',function(e) {
     mat.setEventAttribute4("attr4");
     mat.setEventAttribute5("attr5");
     mat.setExistingUser(false);
+    
+    mat.setEventContentType("testContentType");
+    mat.setEventContentId("testContentId");
+    mat.setEventDate1(new Date().toISOString ());
+    mat.setEventDate2(new Date().toISOString ());
+    mat.setEventLevel(3);
+    mat.setEventQuantity(2);
+    mat.setEventRating(4.5);
+    mat.setEventSearchString("testSearchString");
+    
     mat.setFacebookUserId("tempFacebook_user_id");
     mat.setGender(1);
     mat.setGoogleAdvertisingId("12345678-1234-1234-1234-123456789012", false);
