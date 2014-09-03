@@ -117,6 +117,11 @@ public class MobileapptrackerModule extends KrollModule {
     }
     
     @Kroll.method
+    public void setAndroidId(String androidId) {
+        mat.setAndroidId(androidId);
+    }
+    
+    @Kroll.method
     public void setAppAdTracking(boolean allowAdTracking) {
         mat.setAppAdTrackingEnabled(allowAdTracking);
     }
