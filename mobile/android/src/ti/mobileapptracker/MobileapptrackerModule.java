@@ -142,13 +142,13 @@ public class MobileapptrackerModule extends KrollModule {
     }
     
     @Kroll.method
-    public void setPayingUser(boolean paying) {
-        mat.setIsPayingUser(paying);
+    public void setGender(int gender) {
+        mat.setGender(MobileAppTracker.GENDER_FEMALE == gender ? MobileAppTracker.GENDER_FEMALE : MobileAppTracker.GENDER_MALE);
     }
     
     @Kroll.method
-    public void setGender(int gender) {
-        mat.setGender(MobileAppTracker.GENDER_FEMALE == gender ? MobileAppTracker.GENDER_FEMALE : MobileAppTracker.GENDER_MALE);
+    public void setInstallReferrer(String referrer) {
+        mat.setInstallReferrer(referrer);
     }
     
     @Kroll.method
@@ -167,6 +167,11 @@ public class MobileapptrackerModule extends KrollModule {
     @Kroll.method
     public void setPackageName(String packageName) {
         mat.setPackageName(packageName);
+    }
+
+    @Kroll.method
+    public void setPayingUser(boolean paying) {
+        mat.setIsPayingUser(paying);
     }
     
     @Kroll.method
