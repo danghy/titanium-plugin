@@ -2,4 +2,4 @@
 
 Please see the Quick Start guide here:
 
-[Titanium Quick Start](http://support.mobileapptracking.com/entries/26457010)
+[Titanium Quick Start](https://developers.mobileapptracking.com/titanium-plugin/)
