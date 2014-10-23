@@ -2,12 +2,12 @@
 # this is your module manifest and used by Titanium
 # during compilation, packaging, distribution, etc.
 #
-version: 3.2
+version: 3.6
 apiversion: 2
 description: An iOS module to provide access to MobileAppTracker SDK from Titanium.
-author: HasOffers Inc
+author: TUNE Inc
 license: Apache License, Version 2.0
-copyright: Copyright (c) 2013 by HasOffers Inc
+copyright: Copyright (c) 2013 by TUNE Inc
 
 
 # these should not be edited
