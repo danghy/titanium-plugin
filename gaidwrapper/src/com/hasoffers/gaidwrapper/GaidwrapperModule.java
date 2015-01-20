@@ -21,8 +21,6 @@ import android.content.Context;
 
 import com.google.android.gms.ads.identifier.AdvertisingIdClient;
 import com.google.android.gms.ads.identifier.AdvertisingIdClient.Info;
-import com.google.android.gms.common.GooglePlayServicesNotAvailableException;
-import com.google.android.gms.common.GooglePlayServicesRepairableException;
 
 @Kroll.module(name="Gaidwrapper", id="com.hasoffers.gaidwrapper")
 public class GaidwrapperModule extends KrollModule
@@ -72,12 +70,8 @@ public class GaidwrapperModule extends KrollModule
                 info.put("gaid", adInfo.getId());
                 info.put("isLAT", adInfo.isLimitAdTrackingEnabled());
                 mCallback.call(getKrollObject(), info);
-            } catch (IOException e) {
-                // Unrecoverable error connecting to Google Play services (e.g.,
-                // the old version of the service doesn't support getting AdvertisingId).
-            } catch (GooglePlayServicesNotAvailableException e) {
-                // Google Play services is not available entirely.
-            } catch (GooglePlayServicesRepairableException e) {
+            } catch (Exception e) {
+            	mCallback.call(getKrollObject(), new KrollDict());
             }
         }
     }

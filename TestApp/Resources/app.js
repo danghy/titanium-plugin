@@ -55,6 +55,7 @@ button.addEventListener('click',function(e) {
 
     mat.initTracker(advId, convKey);
     mat.setPackageName(pkgName);
+    
     if(isiOS)
     {
         mat.setAppleAdvertisingIdentifier(ifawrapper.getAppleAdvertisingIdentifier(), ifawrapper.getIsAdvertisingTrackingEnabled());
@@ -62,7 +63,11 @@ button.addEventListener('click',function(e) {
     if (isAndroid)
     {
         gaidwrapper.getGoogleAdvertisingId(function(result) {
-            mat.setGoogleAdvertisingId(result['gaid'], result['isLAT']);
+            if (result['gaid'] != null) {
+                mat.setGoogleAdvertisingId(result['gaid'], result['isLAT']);
+            } else {
+                mat.setAndroidId(Ti.Platform.id);
+            }
         });
     }
     mat.setDelegate(true);

@@ -24,6 +24,7 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import com.mobileapptracker.Encryption;
 import com.mobileapptracker.MATEventItem;
 import com.mobileapptracker.MobileAppTracker;
 
@@ -122,6 +123,21 @@ public class MobileapptrackerModule extends KrollModule {
     }
     
     @Kroll.method
+    public void setAndroidIdMd5(String androidId) {
+        mat.setAndroidIdMd5(Encryption.md5(androidId));
+    }
+    
+    @Kroll.method
+    public void setAndroidIdSha1(String androidId) {
+        mat.setAndroidIdSha1(Encryption.sha1(androidId));
+    }
+    
+    @Kroll.method
+    public void setAndroidIdSha256(String androidId) {
+        mat.setAndroidIdSha256(Encryption.sha256(androidId));
+    }
+    
+    @Kroll.method
     public void setAppAdTracking(boolean allowAdTracking) {
         mat.setAppAdTrackingEnabled(allowAdTracking);
     }
@@ -134,6 +150,11 @@ public class MobileapptrackerModule extends KrollModule {
     @Kroll.method
     public void setDebugMode(boolean debugMode) {
         mat.setDebugMode(debugMode);
+    }
+    
+    @Kroll.method
+    public void setEmailCollection(boolean collectEmail) {
+        mat.setEmailCollection(collectEmail);
     }
     
     @Kroll.method
@@ -185,13 +206,13 @@ public class MobileapptrackerModule extends KrollModule {
     }
     
     @Kroll.method
-    public void setUserEmail(String user_email) {
-        mat.setUserEmail(user_email);
+    public void setUserEmail(String userEmail) {
+        mat.setUserEmail(userEmail);
     }
     
     @Kroll.method
-    public void setUserName(String user_name) {
-        mat.setUserName(user_name);
+    public void setUserName(String userName) {
+        mat.setUserName(userName);
     }
 
     @Kroll.method
