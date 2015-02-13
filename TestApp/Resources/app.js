@@ -27,6 +27,22 @@ Ti.API.info("[INFO] Ti.Platform.name = " + Ti.Platform.name);
 var mat = require("ti.mobileapptracker");
 Ti.API.info("module is => " + mat);
 
+mat.addEventListener("mobileAppTrackerDidReceiveDeeplink", function(e){
+    Ti.API.info("event 'mobileAppTrackerDidReceiveDeeplink' => " + JSON.stringify(e));
+});
+
+mat.addEventListener("mobileAppTrackerEnqueuedActionWithReferenceId", function(e){
+    Ti.API.info("event 'mobileAppTrackerEnqueuedActionWithReferenceId' => " + JSON.stringify(e));
+});
+
+mat.addEventListener("mobileAppTrackerDidSucceedWithData", function(e){
+    Ti.API.info("event 'mobileAppTrackerDidSucceedWithData' => " + JSON.stringify(e));
+});
+
+mat.addEventListener("mobileAppTrackerDidFailWithError", function(e){
+    Ti.API.info("event 'mobileAppTrackerDidFailWithError' => " + JSON.stringify(e));
+});
+
 var isiOS = Ti.Platform.osname=='iphone' || Ti.Platform.osname=='ipad';
 var isAndroid = Ti.Platform.osname=='android';
 
@@ -52,15 +68,16 @@ button.addEventListener('click',function(e) {
     var advId = "877";
     var convKey = "8c14d6bbe466b65211e781d62e301eec";
     var pkgName = "com.hasoffers.titaniumsample";
-
+    
     mat.initTracker(advId, convKey);
     mat.setPackageName(pkgName);
     
     if(isiOS)
     {
         mat.setAppleAdvertisingIdentifier(ifawrapper.getAppleAdvertisingIdentifier(), ifawrapper.getIsAdvertisingTrackingEnabled());
+        mat.checkForDeferredDeeplink(2000); // 750 ms
     }
-    if (isAndroid)
+    else if (isAndroid)
     {
         gaidwrapper.getGoogleAdvertisingId(function(result) {
             if (result['gaid'] != null) {
@@ -68,6 +85,8 @@ button.addEventListener('click',function(e) {
             } else {
                 mat.setAndroidId(Ti.Platform.id);
             }
+            
+            mat.checkForDeferredDeeplink(750); // 750 ms
         });
     }
     mat.setDelegate(true);
@@ -197,6 +216,7 @@ button.addEventListener('click',function(e) {
     mat.setEventRating(4.5);
     mat.setEventSearchString("testSearchString");
     
+    mat.setFacebookEventLogging(true, false);
     mat.setFacebookUserId("tempFacebook_user_id");
     mat.setGender(1);
     mat.setGoogleAdvertisingId("12345678-1234-1234-1234-123456789012", false);

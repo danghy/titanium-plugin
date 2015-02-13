@@ -9,6 +9,8 @@
 #import "TiHost.h"
 #import "TiUtils.h"
 
+#import <Foundation/Foundation.h>
+
 @implementation TiMobileapptrackerModule
 
 #pragma mark Internal
@@ -104,6 +106,13 @@
     NSLog(@"[INFO] TIMATModule: setPackageName")
     
     [MobileAppTracker setPackageName:packageName];
+}
+
+- (void)checkForDeferredDeeplink:(id)timeoutMillis
+{
+    NSLog(@"[INFO] TIMATModule: checkForDeferredDeeplink")
+    
+    [MobileAppTracker checkForDeferredDeeplinkWithTimeout:[TiUtils doubleValue:timeoutMillis] / 1000]; // millis to sec
 }
 
 - (void)setDebugMode:(id)enable
@@ -365,6 +374,24 @@
     NSLog(@"[INFO] TIMATModule: setExistingUser");
     
     [MobileAppTracker setExistingUser:[TiUtils boolValue:enable]];
+}
+
+- (void)setFacebookEventLogging:(id)args
+{
+    NSLog(@"[INFO] TIMATModule: setFacebookEventLogging");
+    
+    NSArray* arguments= args;
+    
+    if ([arguments count] == 2)
+    {
+        NSNumber* numEnable = [arguments objectAtIndex:0];
+        NSNumber* numLimit = [arguments objectAtIndex:1];
+        
+        BOOL enable = [numEnable boolValue];
+        BOOL limit = [numLimit boolValue];
+        
+        [MobileAppTracker setFacebookEventLogging:enable limitEventAndDataUsage:limit];
+    }
 }
 
 - (void)setPayingUser:(id)enable
@@ -691,16 +718,35 @@ NSDateFormatter* dateFormatter()
 {
     NSString *str = [[NSString alloc] initWithData:data encoding:NSUTF8StringEncoding];
     NSLog(@"[INFO] TIMATModule MAT didSucceed: %@", str);
+    
+    NSDictionary *dict = @{@"data":str ? str : @""};
+    
+    [self fireEvent:@"mobileAppTrackerDidSucceedWithData" withObject:dict];
 }
 
 - (void)mobileAppTrackerDidFailWithError:(NSError *)error
 {
     NSLog(@"[INFO] TIMATModule MAT didFail: %@", error);
+    
+    [self fireEvent:@"mobileAppTrackerDidFailWithError" withObject:error.userInfo errorCode:error.code message:error.description];
 }
 
 - (void)mobileAppTrackerEnqueuedActionWithReferenceId:(NSString *)referenceId
 {
     NSLog(@"[INFO] TIMATModule MAT didEnqueue: %@", referenceId);
+    
+    NSDictionary *dict = @{@"refId":referenceId ? referenceId : @""};
+    
+    [self fireEvent:@"mobileAppTrackerEnqueuedActionWithReferenceId" withObject:dict];
+}
+
+- (void)mobileAppTrackerDidReceiveDeeplink:(NSString *)deeplink
+{
+    NSLog(@"[INFO] TIMATModule MAT didReceiveDeeplink: %@", deeplink);
+    
+    NSDictionary *dict = @{@"deeplink":deeplink ? deeplink : @""};
+    
+    [self fireEvent:@"mobileAppTrackerDidReceiveDeeplink" withObject:dict];
 }
 
 @end

@@ -71,7 +71,7 @@ public class GaidwrapperModule extends KrollModule
                 info.put("isLAT", adInfo.isLimitAdTrackingEnabled());
                 mCallback.call(getKrollObject(), info);
             } catch (Exception e) {
-            	mCallback.call(getKrollObject(), new KrollDict());
+                mCallback.call(getKrollObject(), new KrollDict());
             }
         }
     }

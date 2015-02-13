@@ -2,7 +2,7 @@
 # this is your module manifest and used by Titanium
 # during compilation, packaging, distribution, etc.
 #
-version: 3.1.3
+version: 3.7.1
 apiversion: 2
 description: A Titanium Module that allows you to access iOS Advertising Identifier on iOS devices.
 author: HasOffers Inc
