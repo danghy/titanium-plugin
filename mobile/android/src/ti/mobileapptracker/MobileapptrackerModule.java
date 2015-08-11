@@ -20,6 +20,7 @@ import java.util.SimpleTimeZone;
 import org.appcelerator.kroll.KrollModule;
 import org.appcelerator.kroll.annotations.Kroll;
 import org.appcelerator.titanium.TiApplication;
+import org.appcelerator.kroll.common.Log;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -36,7 +37,10 @@ public class MobileapptrackerModule extends KrollModule {
     private static MobileAppTracker mat = null;
     
     private final String MAT_DATE_TIME_FORMAT = "yyyy'-'MM'-'dd'T'HH':'mm':'ss'.'SSS'Z'"; // ISO 8601 Extended Format (always UTC) -- http://www.w3schools.com/jsref/jsref_toisostring.asp
-    
+
+    // Standard Debugging variables
+    private static final String TAG = "TiMobileapptrackerAndroidModule";
+
     public MobileapptrackerModule() {
         super();
     }
@@ -50,9 +54,11 @@ public class MobileapptrackerModule extends KrollModule {
     public void initTracker(String advId, String convKey) {
         
         MobileAppTracker.init(getActivity(), advId, convKey);
-        
+
+        MyMATResponse response = new MyMATResponse();
+        MobileAppTracker.getInstance().setMATResponse(response);
         mat = MobileAppTracker.getInstance();
-        
+
         mat.setPluginName("titanium");
     }
     
@@ -63,36 +69,44 @@ public class MobileapptrackerModule extends KrollModule {
     
     @Kroll.method
     public void measureAction(String eventIdOrName) {
+        Log.d(TAG, "measureAction(String eventIdOrName): " + eventIdOrName);
         mat.measureAction(eventIdOrName);
     }
     
     @Kroll.method
     public void measureAction(String eventIdOrName, String refId) {
+        Log.d(TAG, "measureAction(String eventIdOrName, String refId): " + eventIdOrName);
         mat.measureAction(eventIdOrName, 0, null, refId);
     }
     
     @Kroll.method
     public void measureAction(String eventIdOrName, double revenue, String currency) {
+        Log.d(TAG, "measureAction(String eventIdOrName, double revenue, String currency): " + eventIdOrName);
         mat.measureAction(eventIdOrName, revenue, currency);
     }
     
     @Kroll.method
     public void measureAction(String eventIdOrName, String refId, double revenue, String currency) {
+        Log.d(TAG, "measureAction(String eventIdOrName, String refId, double revenue, String currency): " + eventIdOrName);
         mat.measureAction(eventIdOrName, revenue, currency, refId);
     }
     
     @Kroll.method
     public void measureActionWithItems(String eventIdOrName, Object[] items) {
+        Log.d(TAG, "measureActionWithItems(String eventIdOrName, Object[] items): " + eventIdOrName);
         measureActionWithReceipt(eventIdOrName, items, null, 0, null, 0, null, null);
     }
     
     @Kroll.method
     public void measureActionWithItems(String eventIdOrName, Object[] items, String refId) {
+        Log.d(TAG, "measureActionWithItems(String eventIdOrName, Object[] items, String refId): " + eventIdOrName);
         measureActionWithReceipt(eventIdOrName, items, refId, 0, null, 0, null, null);
     }
     
     @Kroll.method
     public void measureActionWithItems(String eventIdOrName, Object[] items, String refId, double revenueAmount, String currencyCode) {
+        Log.d(TAG, "measureActionWithItems(String eventIdOrName, Object[] items, String refId, double revenueAmount, String currencyCode): " + eventIdOrName);
+        Log.d(TAG, "measureActionWithItems items.length: " + items.length);
         measureActionWithReceipt(eventIdOrName, items, refId, revenueAmount, currencyCode, 0, null, null);
     }
     
@@ -202,31 +216,37 @@ public class MobileapptrackerModule extends KrollModule {
     
     @Kroll.method
     public void setUserId(String userId) {
+        Log.d(TAG, "setUserId: " + userId);
         mat.setUserId(userId);
     }
     
     @Kroll.method
     public void setUserEmail(String userEmail) {
+        Log.d(TAG, "setUserEmail: " + userEmail);
         mat.setUserEmail(userEmail);
     }
     
     @Kroll.method
     public void setUserName(String userName) {
+        Log.d(TAG, "setUserName: " + userName);
         mat.setUserName(userName);
     }
 
     @Kroll.method
     public void setFacebookUserId(String facebookUserId) {
+        Log.d(TAG, "setFacebookUserId: " + facebookUserId);
         mat.setFacebookUserId(facebookUserId);
     }
 
     @Kroll.method
     public void setTwitterUserId(String twitterUserId) {
+        Log.d(TAG, "setTwitterUserId: " + twitterUserId);
         mat.setTwitterUserId(twitterUserId);
     }
 
     @Kroll.method
     public void setGoogleUserId(String googleUserId) {
+        Log.d(TAG, "setGoogleUserId: " + googleUserId);
         mat.setGoogleUserId(googleUserId);
     }
     
@@ -237,37 +257,43 @@ public class MobileapptrackerModule extends KrollModule {
     
     @Kroll.method
     public void setEventAttribute1(String attr) {
+        Log.d(TAG, "setEventAttribute1: " + attr);
         mat.setEventAttribute1(attr);
     }
     
     @Kroll.method
     public void setEventAttribute2(String attr) {
+        Log.d(TAG, "setEventAttribute2: " + attr);
         mat.setEventAttribute2(attr);
     }
     
     @Kroll.method
     public void setEventAttribute3(String attr) {
+        Log.d(TAG, "setEventAttribute3: " + attr);
         mat.setEventAttribute3(attr);
     }
     
     @Kroll.method
     public void setEventAttribute4(String attr) {
+        Log.d(TAG, "setEventAttribute4: " + attr);
         mat.setEventAttribute4(attr);
     }
     
     @Kroll.method
     public void setEventAttribute5(String attr) {
+        Log.d(TAG, "setEventAttribute5: " + attr);
         mat.setEventAttribute5(attr);
     }
     
     @Kroll.method
     public void setEventContentId(String contentId) {
-        
+        Log.d(TAG, "setEventContentId: " + contentId);
         mat.setEventContentId(contentId);
     }
     
     @Kroll.method
     public void setEventContentType(String contentType) {
+        Log.d(TAG, "setEventContentType: " + contentType);
         mat.setEventContentType(contentType);
     }
     
