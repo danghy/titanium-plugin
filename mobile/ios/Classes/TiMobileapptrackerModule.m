@@ -11,7 +11,15 @@
 
 #import <Foundation/Foundation.h>
 
+@interface Tune (TiMobileapptrackerModule)
+
++ (void)setPluginName:(NSString *)pluginName;
+
+@end
+
 @implementation TiMobileapptrackerModule
+
+
 
 #pragma mark Internal
 
@@ -96,178 +104,140 @@
     NSString *aid = [arr objectAtIndex:0];
     NSString *key = [arr objectAtIndex:1];
     
-    [MobileAppTracker initializeWithMATAdvertiserId:aid MATConversionKey:key];
-    
-    [MobileAppTracker setPluginName:@"titanium"];
+    [Tune initializeWithTuneAdvertiserId:aid tuneConversionKey:key];
+    [Tune setPluginName:@"titanium"];
 }
 
 - (void)setPackageName:(id)packageName
 {
-    NSLog(@"[INFO] TIMATModule: setPackageName")
-    
-    [MobileAppTracker setPackageName:packageName];
+    NSLog(@"[INFO] TIMATModule: setPackageName");
+    [Tune setPackageName:packageName];
 }
 
-- (void)checkForDeferredDeeplink:(id)timeoutMillis
+- (void)checkForDeferredDeeplink:(id)args
 {
-    NSLog(@"[INFO] TIMATModule: checkForDeferredDeeplink")
-    
-    [MobileAppTracker checkForDeferredDeeplinkWithTimeout:[TiUtils doubleValue:timeoutMillis] / 1000]; // millis to sec
+    NSLog(@"[INFO] TIMATModule: checkForDeferredDeeplink");
+    [Tune checkForDeferredDeeplink:self];
 }
 
 - (void)setDebugMode:(id)enable
 {
-    NSLog(@"[INFO] TIMATModule: setDebugMode")
-    
-    [MobileAppTracker setDebugMode:[TiUtils boolValue:enable]];
+    NSLog(@"[INFO] TIMATModule: setDebugMode");
+    [Tune setDebugMode:[TiUtils boolValue:enable]];
 }
 
 - (void)setAllowDuplicates:(id)enable
 {
-    NSLog(@"[INFO] TIMATModule: setAllowDuplicates")
-    
-    [MobileAppTracker setAllowDuplicateRequests:[TiUtils boolValue:enable]];
+    NSLog(@"[INFO] TIMATModule: setAllowDuplicates");
+    [Tune setAllowDuplicateRequests:[TiUtils boolValue:enable]];
 }
 
 - (void)setDelegate:(id)enable
 {
-    NSLog(@"[INFO] TIMATModule: setDelegate")
-    
-    id<MobileAppTrackerDelegate> dele = [TiUtils boolValue:enable] ? self : nil;
-    
-    [MobileAppTracker setDelegate:dele];
+    NSLog(@"[INFO] TIMATModule: setDelegate");
+    id<TuneDelegate> dele = [TiUtils boolValue:enable] ? self : nil;
+    [Tune setDelegate:dele];
 }
 
 - (void)measureSession:(id)dummy
 {
-    NSLog(@"[INFO] TIMATModule: measureSession")
-    
-    [MobileAppTracker measureSession];
+    NSLog(@"[INFO] TIMATModule: measureSession");
+    [Tune measureSession];
 }
 
-- (void)measureAction:(id)args
+- (void)measureEventName:(id)eventName
 {
-    NSLog(@"[INFO] TIMATModule: measureAction")
-    
-    NSArray *arr = args;
-    
-    NSInteger paramCount = arr ? [arr count] : 0;
-    
-    if(paramCount > 0)
-    {
-        NSString *strEvent = [arr objectAtIndex:0];
-        NSString *strRefId = nil;
-        double revenue = 0;
-        NSString *strCurrency = nil;
-        
-        if(paramCount > 1)
-        {
-            strRefId = [arr objectAtIndex:1];
-            
-            if(paramCount > 2)
-            {
-                NSNumber* numRev = [arr objectAtIndex:2];
-                revenue = [numRev doubleValue];
-                
-                if(paramCount > 3)
-                {
-                    strCurrency = [arr objectAtIndex:3];
-                }
-            }
-        }
-        
-        [MobileAppTracker measureAction:strEvent
-                            referenceId:strRefId
-                          revenueAmount:revenue
-                           currencyCode:strCurrency];
-    }
+    NSLog(@"[INFO] TIMATModule: measureEventName");
+    ENSURE_SINGLE_ARG(eventName, NSString);
+    [Tune measureEventName:eventName];
 }
 
-- (void)measureActionWithItems:(id)args
+- (void)measureEvent:(id)args
 {
-    NSLog(@"[INFO] TIMATModule: measureActionWithItems");
+    NSLog(@"[INFO] TIMATModule: measureEvent");
+    NSDictionary* eventDict = [args objectAtIndex:0];
     
-    NSArray *arr = args;
-    
-    NSInteger paramCount = arr ? [arr count] : 0;
-    
-    if(paramCount > 0)
-    {
-        NSString *strEvent = [arr objectAtIndex:0];
-        NSArray *arrItems = nil;
-        NSString *strRefId = nil;
-        double revenue = 0;
-        NSString *strCurrency = nil;
-        
-        if(paramCount > 1)
-        {
-            arrItems = [arr objectAtIndex:1];
-            arrItems = [NSNull null] == (id)arrItems ? nil : arrItems;
-            arrItems = [self convertToMATEventItems:arrItems];
-            
-            if(paramCount > 2)
-            {
-                strRefId = [arr objectAtIndex:2];
-                
-                if(paramCount > 3)
-                {
-                    NSNumber* numRev = [arr objectAtIndex:3];
-                    revenue = [numRev doubleValue];
-                    
-                    if(paramCount > 4)
-                    {
-                        strCurrency = [arr objectAtIndex:4];
-                    }
-                }
-            }
-        }
-        
-        [MobileAppTracker measureAction:strEvent
-                             eventItems:arrItems
-                            referenceId:strRefId
-                          revenueAmount:revenue
-                           currencyCode:strCurrency];
+    NSString* eventName = (NSString*)[eventDict objectForKey:@"eventName"];
+    // If event name is nil, exit
+    if (!eventName) {
+        return;
     }
-}
-
-- (void)measureActionWithReceipt:(id)args
-{
-    NSLog(@"[INFO] TIMATModule: measureActionWithReceipt");
     
-    NSArray *arr = args;
+    // Construct TuneEvent from JS dictionary
+    TuneEvent *event = [TuneEvent eventWithName:eventName];
     
-    if (arr && [arr count] > 6)
-    {
-        NSString *strEvent = [arr objectAtIndex:0];
-        
-        NSArray *arrItems = [arr objectAtIndex:1];
-        arrItems = [NSNull null] == (id)arrItems ? nil : arrItems;
-        
-        arrItems = [self convertToMATEventItems:arrItems];
-        
-        NSString *strRefId = [arr objectAtIndex:2];
-        
-        NSNumber* numRev = [arr objectAtIndex:3];
-        double revenue = [numRev doubleValue];
-        
-        NSString *strCurrency = [arr objectAtIndex:4];
-        
-        NSNumber* numTransactionState = [arr objectAtIndex:5];
-        int transactionState = [numTransactionState intValue];
-        
-        NSString *strReceipt = [arr objectAtIndex:6];
-        NSData *receiptData = [strReceipt dataUsingEncoding:NSUTF8StringEncoding];
-        
-        // receiptSignature -- only for Android, ignore on iPhone
-        
-        [MobileAppTracker measureAction:strEvent
-                             eventItems:arrItems
-                            referenceId:strRefId
-                          revenueAmount:revenue
-                           currencyCode:strCurrency
-                       transactionState:transactionState
-                                receipt:receiptData];
+    // Check if optional fields exist
+    NSNumber* revenue = (NSNumber*)[eventDict objectForKey:@"revenue"];
+    if (revenue) {
+        event.revenue = [revenue floatValue];
     }
+    NSString* currencyCode = (NSString*)[eventDict objectForKey:@"currencyCode"];
+    if (currencyCode) {
+        event.currencyCode = currencyCode;
+    }
+    NSString* advertiserRefId = (NSString*)[eventDict objectForKey:@"advertiserRefId"];
+    if (advertiserRefId) {
+        event.refId = advertiserRefId;
+    }
+    NSString* contentId = (NSString*)[eventDict objectForKey:@"contentId"];
+    if (contentId) {
+        event.contentId = contentId;
+    }
+    NSString* contentType = (NSString*)[eventDict objectForKey:@"contentType"];
+    if (contentType) {
+        event.contentType = contentType;
+    }
+    if ([eventDict objectForKey:@"date1"]) {
+        event.date1 = [NSDate dateWithTimeIntervalSince1970:[((NSNumber*)[eventDict objectForKey:@"date1"]) doubleValue]/1000];
+    }
+    if ([eventDict objectForKey:@"date2"]) {
+        event.date2 = [NSDate dateWithTimeIntervalSince1970:[((NSNumber*)[eventDict objectForKey:@"date2"]) doubleValue]/1000];
+    }
+    if ([eventDict objectForKey:@"level"]) {
+        event.level = [(NSNumber*)[eventDict objectForKey:@"level"] intValue];
+    }
+    if ([eventDict objectForKey:@"quantity"]) {
+        event.quantity = [(NSNumber*)[eventDict objectForKey:@"quantity"] intValue];
+    }
+    NSNumber* rating = (NSNumber*)[eventDict objectForKey:@"rating"];
+    if (rating) {
+        event.rating = [rating floatValue];
+    }
+    NSString* searchString = (NSString*)[eventDict objectForKey:@"searchString"];
+    if (searchString) {
+        event.searchString = searchString;
+    }
+    NSString* attribute1 = (NSString*)[eventDict objectForKey:@"attribute1"];
+    if (attribute1) {
+        event.attribute1 = attribute1;
+    }
+    NSString* attribute2 = (NSString*)[eventDict objectForKey:@"attribute2"];
+    if (attribute2) {
+        event.attribute2 = attribute2;
+    }
+    NSString* attribute3 = (NSString*)[eventDict objectForKey:@"attribute3"];
+    if (attribute3) {
+        event.attribute3 = attribute3;
+    }
+    NSString* attribute4 = (NSString*)[eventDict objectForKey:@"attribute4"];
+    if (attribute4) {
+        event.attribute4 = attribute4;
+    }
+    NSString* attribute5 = (NSString*)[eventDict objectForKey:@"attribute5"];
+    if (attribute5) {
+        event.attribute5 = attribute5;
+    }
+    NSString* receipt = (NSString*)[eventDict objectForKey:@"receipt"];
+    if (receipt) {
+        event.receipt = [receipt dataUsingEncoding:NSUTF8StringEncoding];;
+    }
+    if ([eventDict objectForKey:@"eventItems"]) {
+        NSArray* eventItems = (NSArray*)[eventDict objectForKey:@"eventItems"];
+        eventItems = [self convertToMATEventItems:eventItems];
+        event.eventItems = eventItems;
+    }
+    
+    [Tune measureEvent:event];
 }
 
 #pragma mark - Other Setter Methods
@@ -275,21 +245,18 @@
 - (void)setSiteId:(id)siteId
 {
     NSLog(@"[INFO] TIMATModule: setSiteId");
-    
-    [MobileAppTracker setSiteId:siteId];
+    [Tune setSiteId:siteId];
 }
 
 - (void)setCurrencyCode:(id)currencyCode
 {
     NSLog(@"[INFO] TIMATModule: setCurrencyCode");
-    
-    [MobileAppTracker setCurrencyCode:currencyCode];
+    [Tune setCurrencyCode:currencyCode];
 }
 
 - (void)setAppleAdvertisingIdentifier:(id)args
 {
     NSLog(@"[INFO] TIMATModule: setAppleAdvertisingIdentifier");
-    
     NSString *strAppleAdvId = [args objectAtIndex:0];
     
     NSNumber* strEnabled = [args objectAtIndex:1];
@@ -299,89 +266,77 @@
     
     if(classNSUUID)
     {
-        [MobileAppTracker setAppleAdvertisingIdentifier:[[classNSUUID alloc] initWithUUIDString:strAppleAdvId] advertisingTrackingEnabled:enabled];
+        [Tune setAppleAdvertisingIdentifier:[[classNSUUID alloc] initWithUUIDString:strAppleAdvId] advertisingTrackingEnabled:enabled];
     }
 }
 
 - (void)setAppleVendorIdentifier:(id)vendorId
 {
     NSLog(@"[INFO] TIMATModule: setAppleVendorIdentifier");
-    
     NSString *strAppleVendorId = vendorId;
-            
     id classNSUUID = NSClassFromString(@"NSUUID");
-    
     if(classNSUUID)
     {
-        [MobileAppTracker setAppleVendorIdentifier:[[classNSUUID alloc] initWithUUIDString:strAppleVendorId]];
+        [Tune setAppleVendorIdentifier:[[classNSUUID alloc] initWithUUIDString:strAppleVendorId]];
     }
 }
 
 - (void)setJailbroken:(id)jailBroken
 {
     NSLog(@"[INFO] TIMATModule: setJailbroken");
-    
-    [MobileAppTracker setJailbroken:[TiUtils boolValue:jailBroken]];
+    [Tune setJailbroken:[TiUtils boolValue:jailBroken]];
 }
 
 - (void)setAge:(id)age
 {
     NSLog(@"[INFO] TIMATModule: setAge");
-    
-    [MobileAppTracker setAge:[age intValue]];
+    [Tune setAge:[age intValue]];
 }
 
 - (void)setLocation:(id)args
 {
     NSLog(@"[INFO] TIMATModule: setLocation");
-    
     NSArray* arguments= args;
-    
     if ([arguments count] == 2)
     {
         NSNumber* numLat = [arguments objectAtIndex:0];
         NSNumber* numLon = [arguments objectAtIndex:1];
         
-        CGFloat lat = [numLat doubleValue];
-        CGFloat lon = [numLon doubleValue];
-        
-        [MobileAppTracker setLatitude:lat longitude:lon];
+        TuneLocation *loc = [TuneLocation new];
+        loc.latitude = numLat;
+        loc.longitude = numLon;
+        [Tune setLocation:loc];
     }
 }
 
 - (void)setLocationWithAltitude:(id)args
 {
     NSLog(@"[INFO] TIMATModule: setLocationWithAltitude");
-    
     NSArray* arguments= args;
-    
     if ([arguments count] == 3)
     {
         NSNumber* numLat = [arguments objectAtIndex:0];
         NSNumber* numLon = [arguments objectAtIndex:1];
         NSNumber* numAlt = [arguments objectAtIndex:2];
         
-        CGFloat lat = [numLat doubleValue];
-        CGFloat lon = [numLon doubleValue];
-        CGFloat alt = [numAlt doubleValue];
-        
-        [MobileAppTracker setLatitude:lat longitude:lon altitude:alt];
+        TuneLocation *loc = [TuneLocation new];
+        loc.latitude = numLat;
+        loc.longitude = numLon;
+        loc.altitude = numAlt;
+        [Tune setLocation:loc];
     }
 }
 
 - (void)setExistingUser:(id)enable
 {
     NSLog(@"[INFO] TIMATModule: setExistingUser");
-    
-    [MobileAppTracker setExistingUser:[TiUtils boolValue:enable]];
+    [Tune setExistingUser:[TiUtils boolValue:enable]];
 }
 
 - (void)setFacebookEventLogging:(id)args
 {
     NSLog(@"[INFO] TIMATModule: setFacebookEventLogging");
-    
     NSArray* arguments= args;
-    
     if ([arguments count] == 2)
     {
         NSNumber* numEnable = [arguments objectAtIndex:0];
@@ -390,194 +345,86 @@
         BOOL enable = [numEnable boolValue];
         BOOL limit = [numLimit boolValue];
         
-        [MobileAppTracker setFacebookEventLogging:enable limitEventAndDataUsage:limit];
+        [Tune setFacebookEventLogging:enable limitEventAndDataUsage:limit];
     }
 }
 
 - (void)setPayingUser:(id)enable
 {
     NSLog(@"[INFO] TIMATModule: setPayingUser");
-    
-    [MobileAppTracker setPayingUser:[TiUtils boolValue:enable]];
+    [Tune setPayingUser:[TiUtils boolValue:enable]];
 }
 
-- (void)setUseCookieTracking:(id)enable
+- (void)setUseCookieMeasurement:(id)enable
 {
     NSLog(@"[INFO] TIMATModule: setUseCookieTracking");
-    
-    [MobileAppTracker setUseCookieTracking:[TiUtils boolValue:enable]];
+    [Tune setUseCookieMeasurement:[TiUtils boolValue:enable]];
 }
 
 - (void)setShouldAutoDetectJailbroken:(id)autoDetect
 {
     NSLog(@"[INFO] TIMATModule: setShouldAutoDetectJailbroken");
-    
-    [MobileAppTracker setShouldAutoDetectJailbroken:[TiUtils boolValue:autoDetect]];
+    [Tune setShouldAutoDetectJailbroken:[TiUtils boolValue:autoDetect]];
 }
 
 - (void)setShouldAutoGenerateAppleVendorIdentifier:(id)autoGen
 {
     NSLog(@"[INFO] TIMATModule: setShouldAutoGenerateAppleVendorIdentifier");
-    
-    [MobileAppTracker setShouldAutoGenerateAppleVendorIdentifier:[TiUtils boolValue:autoGen]];
+    [Tune setShouldAutoGenerateAppleVendorIdentifier:[TiUtils boolValue:autoGen]];
 }
 
-- (void)setAppAdTracking:(id)enable
+- (void)setAppAdMeasurement:(id)enable
 {
     NSLog(@"[INFO] TIMATModule: setAppAdTracking");
-    
-    [MobileAppTracker setAppAdTracking:[TiUtils boolValue:enable]];
+    [Tune setAppAdMeasurement:[TiUtils boolValue:enable]];
 }
 
 - (void)setGender:(id)gender
 {
     NSLog(@"[INFO] TIMATModule: setGender");
-    
-    [MobileAppTracker setGender:[TiUtils intValue:gender]];
+    [Tune setGender:[TiUtils intValue:gender]];
 }
 
 - (void)setUserId:(id)userId
 {
     NSLog(@"[INFO] TIMATModule: setUserId");
-    
-    [MobileAppTracker setUserId:userId];
+    [Tune setUserId:userId];
 }
 
 - (void)setTRUSTeId:(id)tpid
 {
     NSLog(@"[INFO] TIMATModule: setTRUSTeId");
-    
-    [MobileAppTracker setTRUSTeId:tpid];
+    [Tune setTRUSTeId:tpid];
 }
 
 - (void)setUserName:(id)userName
 {
     NSLog(@"[INFO] TIMATModule: setUserName");
-    
-    [MobileAppTracker setUserName:userName];
+    [Tune setUserName:userName];
 }
 
 - (void)setUserEmail:(id)userEmail
 {
     NSLog(@"[INFO] TIMATModule: setUserEmail");
-    
-    [MobileAppTracker setUserEmail:userEmail];
+    [Tune setUserEmail:userEmail];
 }
 
 - (void)setFacebookUserId:(id)userId
 {
     NSLog(@"[INFO] TIMATModule: setFacebookUserId");
-    
-    [MobileAppTracker setFacebookUserId:userId];
+    [Tune setFacebookUserId:userId];
 }
 
 - (void)setGoogleUserId:(id)userId
 {
     NSLog(@"[INFO] TIMATModule: setGoogleUserId");
-    
-    [MobileAppTracker setGoogleUserId:userId];
+    [Tune setGoogleUserId:userId];
 }
 
 - (void)setTwitterUserId:(id)userId
 {
     NSLog(@"[INFO] TIMATModule: setTwitterUserId");
-    
-    [MobileAppTracker setTwitterUserId:userId];
-}
-
-- (void)setEventAttribute1:(id)attr
-{
-    NSLog(@"[INFO] TIMATModule: setEventAttribute1");
-    
-    [MobileAppTracker setEventAttribute1:attr];
-}
-
-- (void)setEventAttribute2:(id)attr
-{
-    NSLog(@"[INFO] TIMATModule: setEventAttribute2");
-    
-    [MobileAppTracker setEventAttribute2:attr];
-}
-
-- (void)setEventAttribute3:(id)attr
-{
-    NSLog(@"[INFO] TIMATModule: setEventAttribute3");
-    
-    [MobileAppTracker setEventAttribute3:attr];
-}
-
-- (void)setEventAttribute4:(id)attr
-{
-    NSLog(@"[INFO] TIMATModule: setEventAttribute4");
-    
-    [MobileAppTracker setEventAttribute4:attr];
-}
-
-- (void)setEventAttribute5:(id)attr
-{
-    NSLog(@"[INFO] TIMATModule: setEventAttribute5");
-    
-    [MobileAppTracker setEventAttribute5:attr];
-}
-
-- (void)setEventContentType:(id)contentType
-{
-    NSLog(@"[INFO] TIMATModule: setEventContentType");
-    
-    [MobileAppTracker setEventContentType:contentType];
-}
-
-- (void)setEventContentId:(id)contentId
-{
-    NSLog(@"[INFO] TIMATModule: setEventContentId");
-    
-    [MobileAppTracker setEventContentId:contentId];
-}
-
-- (void)setEventDate1:(id)dateString
-{
-    NSLog(@"[INFO] TIMATModule: setEventDate1");
-    
-    NSDate* date = [dateFormatter() dateFromString:dateString];
-    
-    [MobileAppTracker setEventDate1:date];
-}
-
-- (void)setEventDate2:(id)dateString
-{
-    NSLog(@"[INFO] TIMATModule: setEventDate2");
-    
-    NSDate* date = [dateFormatter() dateFromString:dateString];
-    
-    [MobileAppTracker setEventDate2:date];
-}
-
-- (void)setEventLevel:(id)level
-{
-    NSLog(@"[INFO] TIMATModule: setLevel");
-    
-    [MobileAppTracker setEventLevel:[level intValue]];
-}
-
-- (void)setEventQuantity:(id)quantity
-{
-    NSLog(@"[INFO] TIMATModule: setEventQuantity");
-    
-    [MobileAppTracker setEventQuantity:[quantity intValue]];
-}
-
-- (void)setEventRating:(id)rating
-{
-    NSLog(@"[INFO] TIMATModule: setRating");
-    
-    [MobileAppTracker setEventRating:[rating floatValue]];
-}
-
-- (void)setEventSearchString:(id)searchString
-{
-    NSLog(@"[INFO] TIMATModule: setEventSearchString");
-    
-    [MobileAppTracker setEventSearchString:searchString];
+    [Tune setTwitterUserId:userId];
 }
 
 - (void)setGoogleAdvertisingId:(id)advId
@@ -588,46 +435,20 @@
 - (void)applicationDidOpenURL:(id)args
 {
     NSLog(@"[INFO] TIMATModule: applicationDidOpenURL");
-    
     NSArray* arguments = args;
-    
     if ([arguments count] == 2)
     {
         NSString* strURL = [arguments objectAtIndex:0];
         NSString* strSource = [arguments objectAtIndex:1];
         
-        [MobileAppTracker applicationDidOpenURL:strURL sourceApplication:strSource];
-    }
-}
-
-- (void)startAppToAppTracking:(id)args
-{
-    NSLog(@"[INFO] TIMATModule: startAppToAppTracking");
-    
-    NSArray* arguments = args;
-    
-    if ([arguments count] == 5)
-    {
-        NSString* strTargetAppPackageName = [arguments objectAtIndex:0];
-        NSString* strTargetAdvId = [arguments objectAtIndex:1];
-        NSString* strTargetOfferId = [arguments objectAtIndex:2];
-        NSString* strTargetPublisherId = [arguments objectAtIndex:3];
-        NSString* strShouldRedirect = [arguments objectAtIndex:4];
-        BOOL shouldRedirect = [strShouldRedirect boolValue];
-        
-        [MobileAppTracker startAppToAppTracking:strTargetAppPackageName
-                                   advertiserId:strTargetAdvId
-                                        offerId:strTargetOfferId
-                                    publisherId:strTargetPublisherId
-                                       redirect:shouldRedirect];
+        [Tune applicationDidOpenURL:strURL sourceApplication:strSource];
     }
 }
 
 - (void)setRedirectUrl:(id)strURL
 {
     NSLog(@"[INFO] TIMATModule: setRedirectUrl");
-    
-    [MobileAppTracker setRedirectUrl:strURL];
+    [Tune setRedirectUrl:strURL];
 }
 
 #pragma mark - Getter Methods
@@ -635,22 +456,19 @@
 - (id)getMatId:(id)dummy
 {
     NSLog(@"[INFO] TIMATModule: getMatId");
-    
-    return [MobileAppTracker matId];
+    return [Tune matId];
 }
 
 - (id)getOpenLogId:(id)dummy
 {
     NSLog(@"[INFO] TIMATModule: getOpenLogId");
-    
-    return [MobileAppTracker openLogId];
+    return [Tune openLogId];
 }
 
 - (id)getIsPayingUser:(id)dummy
 {
     NSLog(@"[INFO] TIMATModule: getIsPayingUser");
-    
-    return [NSNumber numberWithBool:[MobileAppTracker isPayingUser]];
+    return [NSNumber numberWithBool:[Tune isPayingUser]];
 }
 
 #pragma mark - Helper Methods
@@ -677,15 +495,15 @@
         NSString *attribute4 = (NSString *)[dict objectForKey:@"attribute4"];
         NSString *attribute5 = (NSString *)[dict objectForKey:@"attribute5"];
         
-        MATEventItem *item = [MATEventItem eventItemWithName:name
-                                                   unitPrice:unitPrice
-                                                    quantity:quantity
-                                                     revenue:revenue
-                                                  attribute1:attribute1
-                                                  attribute2:attribute2
-                                                  attribute3:attribute3
-                                                  attribute4:attribute4
-                                                  attribute5:attribute5];
+        TuneEventItem *item = [TuneEventItem eventItemWithName:name
+                                                     unitPrice:unitPrice
+                                                      quantity:quantity
+                                                       revenue:revenue
+                                                    attribute1:attribute1
+                                                    attribute2:attribute2
+                                                    attribute3:attribute3
+                                                    attribute4:attribute4
+                                                    attribute5:attribute5];
         
         [arrItems addObject:item];
     }
@@ -712,41 +530,46 @@ NSDateFormatter* dateFormatter()
     return sharedDateFormatter;
 }
 
-#pragma mark - MobileAppTrackerDelegate Methods
+#pragma mark - TuneDelegate Methods
 
-- (void)mobileAppTrackerDidSucceedWithData:(id)data
+- (void)tuneDidSucceedWithData:(id)data
 {
     NSString *str = [[NSString alloc] initWithData:data encoding:NSUTF8StringEncoding];
-    NSLog(@"[INFO] TIMATModule MAT didSucceed: %@", str);
+    NSLog(@"[INFO] TIMATModule tuneDidSucceedWithData: %@", str);
     
     NSDictionary *dict = @{@"data":str ? str : @""};
     
-    [self fireEvent:@"mobileAppTrackerDidSucceedWithData" withObject:dict];
+    [self fireEvent:@"tuneDidSucceedWithData" withObject:dict];
 }
 
-- (void)mobileAppTrackerDidFailWithError:(NSError *)error
+- (void)tuneDidFailWithError:(NSError *)error
 {
-    NSLog(@"[INFO] TIMATModule MAT didFail: %@", error);
+    NSLog(@"[INFO] TIMATModule tuneDidFailWithError: %@", error);
     
-    [self fireEvent:@"mobileAppTrackerDidFailWithError" withObject:error.userInfo errorCode:error.code message:error.description];
+    [self fireEvent:@"tuneDidFailWithError" withObject:error.userInfo errorCode:error.code message:error.description];
 }
 
-- (void)mobileAppTrackerEnqueuedActionWithReferenceId:(NSString *)referenceId
+- (void)tuneEnqueuedActionWithReferenceId:(NSString *)referenceId
 {
-    NSLog(@"[INFO] TIMATModule MAT didEnqueue: %@", referenceId);
+    NSLog(@"[INFO] TIMATModule tuneEnqueuedActionWithReferenceId: %@", referenceId);
     
     NSDictionary *dict = @{@"refId":referenceId ? referenceId : @""};
     
-    [self fireEvent:@"mobileAppTrackerEnqueuedActionWithReferenceId" withObject:dict];
+    [self fireEvent:@"tuneEnqueuedActionWithReferenceId" withObject:dict];
 }
 
-- (void)mobileAppTrackerDidReceiveDeeplink:(NSString *)deeplink
+- (void)tuneDidReceiveDeeplink:(NSString *)deeplink
 {
-    NSLog(@"[INFO] TIMATModule MAT didReceiveDeeplink: %@", deeplink);
-    
+    NSLog(@"[INFO] TIMATModule tuneDidReceiveDeeplink: %@", deeplink);
     NSDictionary *dict = @{@"deeplink":deeplink ? deeplink : @""};
-    
-    [self fireEvent:@"mobileAppTrackerDidReceiveDeeplink" withObject:dict];
+    [self fireEvent:@"tuneDidReceiveDeeplink" withObject:dict];
+}
+
+- (void)tuneDidFailDeeplinkWithError:(NSError *)error
+{
+    NSLog(@"[INFO] TIMATModule tuneDidFailDeeplinkWithError: %@", error);
+    NSDictionary *dict = @{@"error":error ? error : @""};
+    [self fireEvent:@"tuneDidFailDeeplinkWithError" withObject:dict];
 }
 
 @end

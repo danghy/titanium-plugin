@@ -1,0 +1,19 @@
+#
+# this is your module manifest and used by Titanium
+# during compilation, packaging, distribution, etc.
+#
+version: 3.11.1
+apiversion: 2
+architectures: armv7 arm64 i386 x86_64
+description: An iOS module to provide access to MobileAppTracker SDK from Titanium.
+author: TUNE Inc
+license: Apache License, Version 2.0
+copyright: Copyright (c) 2013 by TUNE Inc
+
+
+# these should not be edited
+name: MobileAppTrackerModule
+moduleid: ti.mobileapptracker
+guid: f3c233bb-5f94-40d2-93a7-2ae3b77f8d9b
+platform: iphone
+minsdk: 4.1.0.GA

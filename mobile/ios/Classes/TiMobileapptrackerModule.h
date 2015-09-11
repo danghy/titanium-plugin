@@ -5,9 +5,12 @@
  * and licensed under the Apache Public License (version 2)
  */
 #import "TiModule.h"
-#import "MobileAppTracker.h"
+#import "Tune.h"
+#import "TuneEvent.h"
+#import "TuneEventItem.h"
+#import "TuneLocation.h"
 
-@interface TiMobileapptrackerModule : TiModule <MobileAppTrackerDelegate>
+@interface TiMobileapptrackerModule : TiModule <TuneDelegate>
 {
 }
 

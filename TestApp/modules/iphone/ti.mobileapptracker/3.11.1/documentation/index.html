@@ -1,0 +1,192 @@
+<h1>MobileAppTracker Module</h1>
+<h2>Description</h2>
+<p>Lets you use the MobileAppTracking SDK for Titanium to track app installs and events for attribution.</p>
+<h2>Getting Started</h2>
+<p>View the <a href="http://docs.appcelerator.com/titanium/latest/#!/guide/Using_Titanium_Modules">Using Titanium Modules</a> document for instructions on getting
+started with using this module in your application.</p>
+<p>The iOS and Android module zip files are located at <code>dist</code>.</p>
+<h2>Accessing the MobileAppTracker Module</h2>
+<p>To access this module from JavaScript, you would do the following:</p>
+<pre><code>var mobileapptracker = require("ti.mobileapptracker");
+</code></pre>
+<p>The mobileapptracker variable is a reference to the Module object.</p>
+<h2>Usage</h2>
+<p>For a complete example of usage, see the implementation in the <code>/TestMAT/Resources/app.js</code> file.</p>
+<p>First initialize the MAT tracker with the <code>initTracker</code> function, passing in your MAT advertiser ID and key:</p>
+<pre><code>mobileapptracker.initTracker("YOUR_ADVERTISER_ID","YOUR_ADVERTISER_KEY");
+</code></pre>
+<h3>Installs and Updates</h3>
+<p>As the success of attributing app events after the initial install is dependent upon first tracking that install, 
+we require that the install is the first event tracked. To track install of your mobile app, use the "trackInstall" 
+method. If users have already installed your app prior to SDK implementation, then these users should be tracked as updates.</p>
+<h4>Track Installs</h4>
+<p>To track installs of your mobile app, use the Track Install method. Track Install is used to track when users install your 
+mobile app on their device and will only record one conversion per install in reports.</p>
+<pre><code>mobileapptracker.trackInstall();
+</code></pre>
+<p>The "trackInstall" method automatically tracks updates of your app if the app version differs from the last app version it saw.</p>
+<h4>Handling Installs Prior to SDK Implementation - Track as Updates</h4>
+<p>What if your app already has thousands or millions of users prior to SDK implementation? What happens when these users update 
+the app to the new version that contains the MAT SDK?</p>
+<p>MAT provides you two ways to make sure that the existing users do not count towards new app installs.</p>
+<ol>
+<li>
+<p>Call SDK method "trackUpdate" instead of "trackInstall".</p>
+<p>If you are integrating MAT into an existing app where you have users you've seen before, you can track an update yourself with the trackUpdate method.</p>
+<pre><code>mobileapptracker.trackUpdate();
+</code></pre>
+</li>
+<li>
+<p>Import prior installs to the platform.</p>
+</li>
+</ol>
+<p>These methods are useful if you already have an app in the store and plan to add the MAT SDK in a new version. 
+Learn how to <a href="http://support.mobileapptracking.com/entries/22621001-Handling-Installs-prior-to-SDK-implementation">handle installs prior to SDK implementation here</a>.</p>
+<p>If the code used to differentiate installs versus app updates is not properly implemented, then you will notice 
+a <a href="http://support.mobileapptracking.com/entries/22900598-Spike-of-Total-Installs-on-First-day-of-SDK">spike of total installs</a> on the first day of the SDK implementation.</p>
+<h3>Events</h3>
+<p>After the install has been tracked, the "trackAction" method is intended to be used to track user actions such as reaching a 
+certain level in a game or making an in-app purchase. The "trackAction" method allows you to define the event name dynamically.</p>
+<pre><code>trackAction(String eventIdOrName, boolean isId, String refId, double revenue, String currency)
+</code></pre>
+<p>where</p>
+<pre><code>eventIdOrName = name or event ID of event to track
+isId = whether eventName is passing event name or event ID # from MAT
+referenceId = advertiser ref ID to associate with event
+revenue = revenue amount to associate with event as double
+currency = ISO 4217 currency code of revenue
+</code></pre>
+<p>You need to supply the "eventIdOrName" field with the appropriate value for the event; e.g. "registration". If the event does
+not exist, it will be dynamically created in our site. You may pass a revenue value, currency code,
+or whether you are using an event ID or event name, as optional fields.</p>
+<h4>Registration</h4>
+<p>If you have a registration process, it's recommended to track it by calling trackAction set to "registration".</p>
+<pre><code>mobileapptracker.trackAction("registration", false, "some_username". 0, "USD");
+</code></pre>
+<p>You can find these events in the platform by viewing Reports &gt; Event Logs. Then filter the report by the "registration" event.</p>
+<p>While our platform always blocks the tracking of duplicate installs, by default it does not block duplicate event requests. 
+However, a registration event may be an event that you only want tracked once per device/user. 
+Please see <a href="http://support.mobileapptracking.com/entries/22927312-Block-Duplicate-Request-Setting-for-Events">block duplicate requests setting for events</a> for further information.</p>
+<h4>Purchases</h4>
+<p>The best way to analyze the value of your publishers and marketing campaigns is to track revenue from in-app purchases.
+By tracking in-app purchases for a user, the data can be correlated back to the install and analyzed on a cohort basis 
+to determine revenue per install and lifetime value.</p>
+<pre><code>mobileapptracker.trackAction("purchase", false, "", 0.99, "USD");
+</code></pre>
+<p><strong>Track In-App Purchases</strong>
+The basic way to track purchases is to track an event with a name of purchase and then define the revenue (sale amount) and currency code.</p>
+<p>Note: Pass the revenue in as a Double and the currency of the amount if necessary.  Currency is set to "USD" by default.
+See <a href="http://support.mobileapptracking.com/entries/23697946-Customize-SDK-Settings">Setting Currency Code</a> for currencies we support.</p>
+<p>You can find these events in platform by viewing Reports &gt; Logs &gt; Events. Then filter the report by the "purchase" event.</p>
+<h4>Opens</h4>
+<p>The SDK allows you to analyze user engagement by tracking unique opens. The SDK has built in functionality to only track one "open" event
+per user on any given day to minimize footprint. All subsequent "open" events fired on the same day are ignored and will not show up on the platform.</p>
+<pre><code>mobileapptracker.trackAction("open", false, "", 0, "USD");
+</code></pre>
+<p>You can find counts of Opens by viewing Reports &gt; Mobile Apps. Include the parameter of Opens to see the aggregated count.
+The platform does not provide logs of Opens. If you track Opens using a name other than "open" then these tracked events will
+cost the same price as all other events to track.</p>
+<h4>Other Events</h4>
+<p>You can track other events in your app dynamically by calling "trackAction". The "trackAction" method is intended for tracking
+any user actions. This method allows you to define the event name.</p>
+<p>To dynamically track an event, replace "eventIdOrName" with the name of the event you want to track. The tracking engine
+will then look up the event by the name. If an event with the defined name doesn't exist, the tracking engine will automatically
+create an event for you with that name. An Event Name has to be alphanumeric.</p>
+<p>You can find these events in platform by viewing Reports-&gt;Logs-&gt;Event Logs.</p>
+<p>The max event limit per site is 100. Learn more about the <a href="http://support.mobileapptracking.com/entries/22803093-Max-Event-Limit-per-Site">max limit of events</a>.</p>
+<p>While our platform always blocks the tracking of duplicate installs, by default it does not block duplicate event requests. 
+However, there may be other types of events that you only want tracked once per device/user. Please see <a href="http://support.mobileapptracking.com/entries/22927312-Block-Duplicate-Request-Setting-for-Events">block duplicate requests setting for events</a> for further information.</p>
+<h3>Testing Plugin Integration with SDK</h3>
+<p>These pages contain instructions on how to test whether the SDKs were successfully implemented for the various platforms:</p>
+<p><a href="http://support.mobileapptracking.com/entries/22541781-Testing-Android-SDK-integration">Testing Android SDK Integration</a></p>
+<p><a href="http://support.mobileapptracking.com/entries/22561876-testing-ios-sdk-integration">Testing iOS SDK Integration</a></p>
+<h3>Debug Mode and Duplicates</h3>
+<p><strong>Debugging</strong></p>
+<p>When the Debug mode is enabled in the SDK, the server responds with debug information about the success or failure of the
+tracking requests.</p>
+<p><strong>Note</strong>: For Android, debug mode log output can be found in LogCat under the tag "MobileAppTracker".</p>
+<p>To debug log messages that show the event status and server response, call the "setDebugMode" method with Boolean true:</p>
+<pre><code>mobileapptracker.setDebugMode(true);
+</code></pre>
+<p><strong>Allow Duplicates</strong></p>
+<p>The platform rejects installs from devices it has seen before.  For testing purposes, you may want to bypass this behavior
+and fire multiple installs from the same testing device.</p>
+<p>There are two methods you can employ to do so: (1) calling the "setAllowDuplicates" method, and (2) set up a test profile.</p>
+<p>(1) Call the "setAllowDuplicates" after initializing MobileAppTracker, with Boolean true:</p>
+<pre><code>mobileapptracker.setAllowDuplicates(true);
+</code></pre>
+<p>(2) Set up a <a href="http://support.mobileapptracking.com/entries/22541401-Test-Profiles">test profile</a>. A Test Profile should be 
+used when you want to allow duplicate installs and/or events from a device you are using from testing and don't want to 
+implement setAllowDuplicateRequests in the code and instead allow duplicate requests from the platform.</p>
+<p><strong><em>The setDebugMode and setAllowDuplicates calls are meant for use only during debugging and testing. Please be sure to disable these for release builds.</em></strong></p>
+<h3>Additional Resources</h3>
+<h4>Custom Settings</h4>
+<p>The SDK supports several custom identifiers that you can use as alternate means to identify your installs or events.
+Call these setters before calling the corresponding trackInstall or trackAction code.</p>
+<p><strong>OpenUDID</strong> (iOS only)</p>
+<p>This sets the OpenUDID of the device. Can be generated with the official implementation at <a href="http://OpenUDID.org">http://OpenUDID.org</a>.
+Calling this will do nothing on Android apps.</p>
+<pre><code>mobileapptracker.setOpenUDID("your_open_udid");
+</code></pre>
+<p><strong>TRUSTe ID</strong></p>
+<p>If you are integrating with the TRUSTe SDK, you can pass in your TRUSTe ID with setTRUSTeId, which populates the "TPID" field.</p>
+<pre><code>mobileapptracker.setTrusteTPID("your_truste_id");
+</code></pre>
+<p><strong>User ID</strong></p>
+<p>If you have a user ID of your own that you wish to track, pass it in as a string with setUserId. This populates the "User ID"
+field in our reporting, and also the postback variable {user_id}.</p>
+<pre><code>mobileapptracker.setUserId("custom_user_id");
+</code></pre>
+<p>The SDK supports several custom identifiers that you can use as alternate means to identify your installs or events.
+Please navigate to the <a href="http://support.mobileapptracking.com/entries/23738686-Customize-SDK-Settings">Custom SDK Settings</a> page for more information.</p>
+<h4>Event Items</h4>
+<p>While an event is like your receipt for a purchase, the event items are the individual items you purchased.
+Event items allow you to define multiple items for a single event. The "trackAction" method can include this event item data.</p>
+<p>The function for tracking event items looks like this:</p>
+<pre><code>trackActionWithItems(eventName, isId, items, referenceId, revenue, currency)
+</code></pre>
+<p>items is an array of "event items" that have the following format:</p>
+<pre><code>{"item":"item_name",    // name of the item
+ "quantity":1,          // # of items
+ "unit_price":0.99,     // individual unit price
+ "revenue":0.99,        // total revenue of event item, defaults to quantity x unit price
+ "attribute_sub1":"1",  // attribute1 for your use (optional)
+ "attribute_sub2":"2",  // attribute2 for your use (optional)
+ "attribute_sub3":"3",  // attribute3 for your use (optional)
+ "attribute_sub4":"4",  // attribute4 for your use (optional)
+ "attribute_sub5":"5"   // attribute5 for your use (optional)
+}
+</code></pre>
+<p>Sample tracking code:</p>
+<pre><code>var eventItems = new Array();
+
+var eventItem1 = {"item":"apple",
+                  "quantity":1,
+                  "unit_price":0.99,
+                  "revenue":0.99,
+                  "attribute_sub1":"1",
+                  "attribute_sub2":"2",
+                  "attribute_sub3":"3",
+                  "attribute_sub4":"4",
+                  "attribute_sub5":"5"
+};
+eventItems[0] = eventItem1;
+
+var eventItem2 = {"item":"banana",
+                  "quantity":2,
+                  "unit_price":0.50,
+                  "revenue":1
+};
+eventItems[1] = eventItem2;
+
+mat.trackActionWithItems("purchase",
+                         false,
+                         eventItems,
+                         "ref1",
+                         0.99,
+                         "USD");
+</code></pre>
+<h2>Author</h2>
+<p>HasOffers Inc</p>
+<h2>License</h2>
+<p>Copyright (c) 2013 HasOffers. Please see the LICENSE file included in the distribution for further details.</p>

@@ -28,4 +28,4 @@
 
 
 
-OTHER_LDFLAGS=$(inherited) -framework CoreTelephony -framework iAd -framework MobileCoreServices -framework SystemConfiguration
+OTHER_LDFLAGS=$(inherited) -framework AdSupport -framework CoreTelephony -framework iAd -framework MobileCoreServices -framework StoreKit -framework SystemConfiguration
