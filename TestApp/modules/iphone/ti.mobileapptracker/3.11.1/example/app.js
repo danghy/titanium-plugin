@@ -1,4 +1,4 @@
-// Test harness for MAT iOS Titanium module
+// Test harness for MAT Titanium iOS module
 
 // open a single window
 var win = Ti.UI.createWindow({
@@ -27,41 +27,26 @@ Ti.API.info("[INFO] Ti.Platform.name = " + Ti.Platform.name);
 var mat = require("ti.mobileapptracker");
 Ti.API.info("module is => " + mat);
 
-mat.addEventListener("mobileAppTrackerDidReceiveDeeplink", function(e){
-    Ti.API.info("event 'mobileAppTrackerDidReceiveDeeplink' => " + JSON.stringify(e));
+
+mat.addEventListener("tuneDidReceiveDeeplink", function(e){
+    Ti.API.info("event 'tuneDidReceiveDeeplink' => " + JSON.stringify(e));
 });
 
-mat.addEventListener("mobileAppTrackerEnqueuedActionWithReferenceId", function(e){
-    Ti.API.info("event 'mobileAppTrackerEnqueuedActionWithReferenceId' => " + JSON.stringify(e));
+mat.addEventListener("tuneDidFailDeeplinkWithError", function(e){
+    Ti.API.info("event 'tuneDidFailDeeplinkWithError' => " + JSON.stringify(e));
 });
 
-mat.addEventListener("mobileAppTrackerDidSucceedWithData", function(e){
-    Ti.API.info("event 'mobileAppTrackerDidSucceedWithData' => " + JSON.stringify(e));
+mat.addEventListener("tuneEnqueuedActionWithReferenceId", function(e){
+    Ti.API.info("event 'tuneEnqueuedActionWithReferenceId' => " + JSON.stringify(e));
 });
 
-mat.addEventListener("mobileAppTrackerDidFailWithError", function(e){
-    Ti.API.info("event 'mobileAppTrackerDidFailWithError' => " + JSON.stringify(e));
+mat.addEventListener("tuneDidSucceedWithData", function(e){
+    Ti.API.info("event 'tuneDidSucceedWithData' => " + JSON.stringify(e));
 });
 
-var isiOS = Ti.Platform.osname=='iphone' || Ti.Platform.osname=='ipad';
-var isAndroid = Ti.Platform.osname=='android';
-
-Ti.API.info("isiOS = " + isiOS);
-Ti.API.info("isAndroid = " + isAndroid);
-
-var ifawrapper = null;
-if(isiOS)
-{
-    ifawrapper = require('com.hasoffers.ifawrapper');
-    Ti.API.info("module is => " + ifawrapper);
-}
-
-var gaidwrapper = null;
-if (isAndroid)
-{
-    gaidwrapper = require('com.hasoffers.gaidwrapper');
-    Ti.API.info("module is => " + gaidwrapper);
-}
+mat.addEventListener("tuneDidFailWithError", function(e){
+    Ti.API.info("event 'tuneDidFailWithError' => " + JSON.stringify(e));
+});
 
 var button = Titanium.UI.createButton({ title: 'Start MAT', top: 45, width: Ti.UI.FILL, height: 200, borderWidth:1, borderRadius:8 });
 button.addEventListener('click',function(e) {
@@ -71,25 +56,9 @@ button.addEventListener('click',function(e) {
     
     mat.initTracker(advId, convKey);
     mat.setPackageName(pkgName);
-    
-    if(isiOS)
-    {
-        mat.setAppleAdvertisingIdentifier(ifawrapper.getAppleAdvertisingIdentifier(), ifawrapper.getIsAdvertisingTrackingEnabled());
-        mat.checkForDeferredDeeplink(2000); // 750 ms
-    }
-    else if (isAndroid)
-    {
-        gaidwrapper.getGoogleAdvertisingId(function(result) {
-            if (result['gaid'] != null) {
-                mat.setGoogleAdvertisingId(result['gaid'], result['isLAT']);
-            } else {
-                mat.setAndroidId(Ti.Platform.id);
-            }
-            
-            mat.checkForDeferredDeeplink(750); // 750 ms
-        });
-    }
     mat.setDelegate(true);
+    
+    mat.checkForDeferredDeeplink();
 });
 scrollView.add(button);
 
@@ -102,55 +71,24 @@ scrollView.add(button);
 var isMATDuplicatesAllowed = false;
 var button = Titanium.UI.createButton({ title: 'Toggle Allow Duplicates', top: 455, width: Ti.UI.FILL, height: 200, borderWidth:1, borderRadius:8 });
 isMATDuplicatesAllowed = !isMATDuplicatesAllowed;
-button.addEventListener('click',function(e) { mat.setAllowDuplicates(isMATDuplicatesAllowed); });
+button.addEventListener('click',function(e) { 
+    mat.setAllowDuplicates(isMATDuplicatesAllowed);
+});
 scrollView.add(button);
 
 var button = Titanium.UI.createButton({ title: 'Measure Session', top: 660, width: Ti.UI.FILL, height: 200, borderWidth:1, borderRadius:8 });
-button.addEventListener('click',function(e) { mat.measureSession(); });
-scrollView.add(button);
-
-var button = Titanium.UI.createButton({ title: 'Measure Action', top: 865, width: Ti.UI.FILL, height: 200, borderWidth:1, borderRadius:8 });
-button.addEventListener('click',function(e) {
-    mat.measureAction("purchase",
-                    "ref1",
-                    0.99,
-                    "USD");
+button.addEventListener('click',function(e) { 
+    mat.measureSession();
 });
 scrollView.add(button);
 
-var button = Titanium.UI.createButton({ title: 'Measure Action With EventItems', top: 1070, width: Ti.UI.FILL, height: 200, borderWidth:1, borderRadius:8 });
+var button = Titanium.UI.createButton({ title: 'Measure Event Name', top: 865, width: Ti.UI.FILL, height: 200, borderWidth:1, borderRadius:8 });
 button.addEventListener('click',function(e) {
-
-    var eventItems = new Array();
-
-    var eventItem1 = {"item":"item1",
-                      "quantity":1,
-                      "unit_price":0.99,
-                      "revenue":0.99,
-                      "attribute_sub1":"1",
-                      "attribute_sub2":"2",
-                      "attribute_sub3":"3",
-                      "attribute_sub4":"4",
-                      "attribute_sub5":"5"
-    };
-    eventItems[0] = eventItem1;
-
-    var eventItem2 = {"item":"item2",
-                      "quantity":2,
-                      "unit_price":0.50,
-                      "revenue":1
-    };
-    eventItems[1] = eventItem2;
-
-    mat.measureActionWithItems("purchaseWithItems",
-                             eventItems,
-                             "ref2",
-                             0.99,
-                             "USD");
+    mat.measureEventName("purchase");
 });
 scrollView.add(button);
 
-var button = Titanium.UI.createButton({ title: 'Measure Action With IAP Receipt', top: 1275, width: Ti.UI.FILL, height: 200, borderWidth:1, borderRadius:8 });
+var button = Titanium.UI.createButton({ title: 'Measure Event With Event Items', top: 1070, width: Ti.UI.FILL, height: 200, borderWidth:1, borderRadius:8 });
 button.addEventListener('click',function(e) {
 
     var eventItems = new Array();
@@ -174,48 +112,40 @@ button.addEventListener('click',function(e) {
     };
     eventItems[1] = eventItem2;
 
-    var receipt = getSampleiTunesIAPReceipt();
-
-    mat.measureActionWithReceipt("purchaseWithReceipt",
-                               eventItems,
-                               "ref3",
-                               0.99,
-                               "USD",
-                               0,
-                               receipt,
-                               null);
-
+    mat.measureEvent({
+        eventName: "purchaseWithItems",
+        eventItems: eventItems,
+        advertiserRefId: "ref2",
+        revenue: 0.99,
+        currencyCode: "USD",
+        receipt: getSampleiTunesIAPReceipt(),
+        contentType: "testContentType",
+        contentId: "testContentId",
+        date1: new Date().getTime(),
+        date2: new Date().getTime(),
+        level: 3,
+        quantity: 2,
+        rating: 4.5,
+        searchString: "testSearchString",
+        attribute1: "attr1",
+        attribute2: "attr2",
+        attribute3: "attr3",
+        attribute4: "attr4",
+        attribute5: "attr5"
+    });
 });
 scrollView.add(button);
 
 
-var button = Titanium.UI.createButton({ title: 'Test Setter Methods', top: 1480, width: Ti.UI.FILL, height: 200, borderWidth:1, borderRadius:8 });
+var button = Titanium.UI.createButton({ title: 'Test Setter Methods', top: 1275, width: Ti.UI.FILL, height: 200, borderWidth:1, borderRadius:8 });
 button.addEventListener('click',function(e) {
 
     mat.setAge(23);
     mat.setAppAdTracking(true);
-    if(isiOS)
-    {
-        mat.setAppleAdvertisingIdentifier(ifawrapper.getAppleAdvertisingIdentifier(), ifawrapper.getIsAdvertisingTrackingEnabled());
-        mat.setAppleVendorIdentifier("12345678-1234-1234-1234-123456789012");
-    }
+    mat.setAppleAdvertisingIdentifier("12345678-1234-1234-1234-123456789012", false);
+    mat.setAppleVendorIdentifier("12345678-1234-1234-1234-123456789012");
     mat.setCurrencyCode("tempCurrencyCode");
-    mat.setEventAttribute1("attr1");
-    mat.setEventAttribute2("attr2");
-    mat.setEventAttribute3("attr3");
-    mat.setEventAttribute4("attr4");
-    mat.setEventAttribute5("attr5");
     mat.setExistingUser(false);
-    
-    mat.setEventContentType("testContentType");
-    mat.setEventContentId("testContentId");
-    mat.setEventDate1(new Date().toISOString ());
-    mat.setEventDate2(new Date().toISOString ());
-    mat.setEventLevel(3);
-    mat.setEventQuantity(2);
-    mat.setEventRating(4.5);
-    mat.setEventSearchString("testSearchString");
-    
     mat.setFacebookEventLogging(true, false);
     mat.setFacebookUserId("tempFacebook_user_id");
     mat.setGender(1);
@@ -235,7 +165,7 @@ button.addEventListener('click',function(e) {
 });
 scrollView.add(button);
 
-var button = Titanium.UI.createButton({ title: 'Test Getter Methods', top: 1685, width: Ti.UI.FILL, height: 200, borderWidth:1, borderRadius:8 });
+var button = Titanium.UI.createButton({ title: 'Test Getter Methods', top: 1480, width: Ti.UI.FILL, height: 200, borderWidth:1, borderRadius:8 });
 button.addEventListener('click',function(e) {
 
     var matId = mat.getMatId();

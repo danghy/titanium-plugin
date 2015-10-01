@@ -1,4 +1,4 @@
-// Test harness for MAT iOS Titanium module
+// Test harness for MAT Titanium module
 
 // open a single window
 var win = Ti.UI.createWindow({
