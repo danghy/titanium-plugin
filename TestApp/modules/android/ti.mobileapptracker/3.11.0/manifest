@@ -1,0 +1,19 @@
+#
+# this is your module manifest and used by Titanium
+# during compilation, packaging, distribution, etc.
+#
+version: 3.11.0
+apiversion: 2
+architectures: armeabi armeabi-v7a x86
+description: An Android module to provide access to MobileAppTracker SDK from Titanium.
+author: HasOffers Inc
+license: Apache License, Version 2.0
+copyright: Copyright (c) 2013 by HasOffers Inc
+
+
+# these should not be edited
+name: mobileapptracker
+moduleid: ti.mobileapptracker
+guid: 7cd34b15-ade0-4c90-887e-76292967b89e
+platform: android
+minsdk: 4.1.0.GA

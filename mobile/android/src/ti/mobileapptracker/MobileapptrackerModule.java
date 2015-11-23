@@ -8,39 +8,31 @@
  */
 package ti.mobileapptracker;
 
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
-import java.util.Locale;
-import java.util.SimpleTimeZone;
 
+import org.appcelerator.kroll.KrollDict;
+import org.appcelerator.kroll.KrollFunction;
 import org.appcelerator.kroll.KrollModule;
 import org.appcelerator.kroll.annotations.Kroll;
 import org.appcelerator.titanium.TiApplication;
-import org.appcelerator.kroll.common.Log;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import com.mobileapptracker.Encryption;
+import com.mobileapptracker.MATDeeplinkListener;
+import com.mobileapptracker.MATEvent;
 import com.mobileapptracker.MATEventItem;
+import com.mobileapptracker.MATGender;
 import com.mobileapptracker.MobileAppTracker;
 
 @Kroll.module(name="Mobileapptracker", id="ti.mobileapptracker")
-public class MobileapptrackerModule extends KrollModule {
-    // You can define constants with @Kroll.constant, for example:
-    // @Kroll.constant public static final String EXTERNAL_NAME = value;
-    
+public class MobileapptrackerModule extends KrollModule {    
     private static MobileAppTracker mat = null;
     
-    private final String MAT_DATE_TIME_FORMAT = "yyyy'-'MM'-'dd'T'HH':'mm':'ss'.'SSS'Z'"; // ISO 8601 Extended Format (always UTC) -- http://www.w3schools.com/jsref/jsref_toisostring.asp
-
-    // Standard Debugging variables
-    private static final String TAG = "TiMobileapptrackerAndroidModule";
-
     public MobileapptrackerModule() {
         super();
     }
@@ -52,13 +44,7 @@ public class MobileapptrackerModule extends KrollModule {
     
     @Kroll.method
     public void initTracker(String advId, String convKey) {
-        
-        MobileAppTracker.init(getActivity(), advId, convKey);
-
-        MyMATResponse response = new MyMATResponse();
-        MobileAppTracker.getInstance().setMATResponse(response);
-        mat = MobileAppTracker.getInstance();
-
+        mat = MobileAppTracker.init(getActivity(), advId, convKey);
         mat.setPluginName("titanium");
     }
     
@@ -68,57 +54,33 @@ public class MobileapptrackerModule extends KrollModule {
     }
     
     @Kroll.method
-    public void measureAction(String eventIdOrName) {
-        Log.d(TAG, "measureAction(String eventIdOrName): " + eventIdOrName);
-        mat.measureAction(eventIdOrName);
+    public void measureEventName(String eventName) {
+        mat.measureEvent(eventName);
     }
     
     @Kroll.method
-    public void measureAction(String eventIdOrName, String refId) {
-        Log.d(TAG, "measureAction(String eventIdOrName, String refId): " + eventIdOrName);
-        mat.measureAction(eventIdOrName, 0, null, refId);
+    public void measureEvent(KrollDict event) {
+        // Convert KrollDict to MATEvent
+        mat.measureEvent(convertToMATEvent(event));
     }
     
     @Kroll.method
-    public void measureAction(String eventIdOrName, double revenue, String currency) {
-        Log.d(TAG, "measureAction(String eventIdOrName, double revenue, String currency): " + eventIdOrName);
-        mat.measureAction(eventIdOrName, revenue, currency);
-    }
-    
-    @Kroll.method
-    public void measureAction(String eventIdOrName, String refId, double revenue, String currency) {
-        Log.d(TAG, "measureAction(String eventIdOrName, String refId, double revenue, String currency): " + eventIdOrName);
-        mat.measureAction(eventIdOrName, revenue, currency, refId);
-    }
-    
-    @Kroll.method
-    public void measureActionWithItems(String eventIdOrName, Object[] items) {
-        Log.d(TAG, "measureActionWithItems(String eventIdOrName, Object[] items): " + eventIdOrName);
-        measureActionWithReceipt(eventIdOrName, items, null, 0, null, 0, null, null);
-    }
-    
-    @Kroll.method
-    public void measureActionWithItems(String eventIdOrName, Object[] items, String refId) {
-        Log.d(TAG, "measureActionWithItems(String eventIdOrName, Object[] items, String refId): " + eventIdOrName);
-        measureActionWithReceipt(eventIdOrName, items, refId, 0, null, 0, null, null);
-    }
-    
-    @Kroll.method
-    public void measureActionWithItems(String eventIdOrName, Object[] items, String refId, double revenueAmount, String currencyCode) {
-        Log.d(TAG, "measureActionWithItems(String eventIdOrName, Object[] items, String refId, double revenueAmount, String currencyCode): " + eventIdOrName);
-        Log.d(TAG, "measureActionWithItems items.length: " + items.length);
-        measureActionWithReceipt(eventIdOrName, items, refId, revenueAmount, currencyCode, 0, null, null);
-    }
-    
-    @Kroll.method
-    public void measureActionWithReceipt(String eventIdOrName, Object[] items, String refId, double revenueAmount, String currencyCode, int transactionState, String receipt, String receiptSignature) {    
-        List<MATEventItem> listItems = convertToMATEventItems(items);
-        
-        if (receiptSignature != null && !receiptSignature.isEmpty()) {
-            mat.measureAction(eventIdOrName, listItems, revenueAmount, currencyCode, refId, receipt, receiptSignature);
-        } else {
-            mat.measureAction(eventIdOrName, listItems, revenueAmount, currencyCode, refId);
-        }
+    public void checkForDeferredDeeplink(final KrollFunction callback) {
+        mat.checkForDeferredDeeplink(new MATDeeplinkListener() {
+            @Override
+            public void didFailDeeplink(String error) {
+                HashMap<String, String> map = new HashMap<String, String>();
+                map.put("error", error);
+                callback.call(getKrollObject(), map);
+            }
+
+            @Override
+            public void didReceiveDeeplink(String deeplink) {
+                HashMap<String, String> map = new HashMap<String, String>();
+                map.put("deeplink", deeplink);
+                callback.call(getKrollObject(), map);
+            }
+        });
     }
     
     @Kroll.method
@@ -137,21 +99,6 @@ public class MobileapptrackerModule extends KrollModule {
     }
     
     @Kroll.method
-    public void setAndroidIdMd5(String androidId) {
-        mat.setAndroidIdMd5(Encryption.md5(androidId));
-    }
-    
-    @Kroll.method
-    public void setAndroidIdSha1(String androidId) {
-        mat.setAndroidIdSha1(Encryption.sha1(androidId));
-    }
-    
-    @Kroll.method
-    public void setAndroidIdSha256(String androidId) {
-        mat.setAndroidIdSha256(Encryption.sha256(androidId));
-    }
-    
-    @Kroll.method
     public void setAppAdTracking(boolean allowAdTracking) {
         mat.setAppAdTrackingEnabled(allowAdTracking);
     }
@@ -167,18 +114,18 @@ public class MobileapptrackerModule extends KrollModule {
     }
     
     @Kroll.method
-    public void setEmailCollection(boolean collectEmail) {
-        mat.setEmailCollection(collectEmail);
-    }
-    
-    @Kroll.method
     public void setExistingUser(boolean existing) {
         mat.setExistingUser(existing);
     }
     
     @Kroll.method
-    public void setGender(int gender) {
-        mat.setGender(MobileAppTracker.GENDER_FEMALE == gender ? MobileAppTracker.GENDER_FEMALE : MobileAppTracker.GENDER_MALE);
+    public void setFacebookEventLogging(boolean enabled, boolean limitEventAndDataUsage) {
+        mat.setFacebookEventLogging(enabled, getActivity(), limitEventAndDataUsage);
+    }
+    
+    @Kroll.method
+    public void setGender(MATGender gender) {
+        mat.setGender(gender);
     }
     
     @Kroll.method
@@ -216,140 +163,37 @@ public class MobileapptrackerModule extends KrollModule {
     
     @Kroll.method
     public void setUserId(String userId) {
-        Log.d(TAG, "setUserId: " + userId);
         mat.setUserId(userId);
     }
     
     @Kroll.method
     public void setUserEmail(String userEmail) {
-        Log.d(TAG, "setUserEmail: " + userEmail);
         mat.setUserEmail(userEmail);
     }
     
     @Kroll.method
     public void setUserName(String userName) {
-        Log.d(TAG, "setUserName: " + userName);
         mat.setUserName(userName);
     }
 
     @Kroll.method
     public void setFacebookUserId(String facebookUserId) {
-        Log.d(TAG, "setFacebookUserId: " + facebookUserId);
         mat.setFacebookUserId(facebookUserId);
     }
 
     @Kroll.method
     public void setTwitterUserId(String twitterUserId) {
-        Log.d(TAG, "setTwitterUserId: " + twitterUserId);
         mat.setTwitterUserId(twitterUserId);
     }
 
     @Kroll.method
     public void setGoogleUserId(String googleUserId) {
-        Log.d(TAG, "setGoogleUserId: " + googleUserId);
         mat.setGoogleUserId(googleUserId);
     }
     
     @Kroll.method
     public void setGoogleAdvertisingId(String adId, boolean isLATEnabled) {
         mat.setGoogleAdvertisingId(adId, isLATEnabled);
-    }
-    
-    @Kroll.method
-    public void setEventAttribute1(String attr) {
-        Log.d(TAG, "setEventAttribute1: " + attr);
-        mat.setEventAttribute1(attr);
-    }
-    
-    @Kroll.method
-    public void setEventAttribute2(String attr) {
-        Log.d(TAG, "setEventAttribute2: " + attr);
-        mat.setEventAttribute2(attr);
-    }
-    
-    @Kroll.method
-    public void setEventAttribute3(String attr) {
-        Log.d(TAG, "setEventAttribute3: " + attr);
-        mat.setEventAttribute3(attr);
-    }
-    
-    @Kroll.method
-    public void setEventAttribute4(String attr) {
-        Log.d(TAG, "setEventAttribute4: " + attr);
-        mat.setEventAttribute4(attr);
-    }
-    
-    @Kroll.method
-    public void setEventAttribute5(String attr) {
-        Log.d(TAG, "setEventAttribute5: " + attr);
-        mat.setEventAttribute5(attr);
-    }
-    
-    @Kroll.method
-    public void setEventContentId(String contentId) {
-        Log.d(TAG, "setEventContentId: " + contentId);
-        mat.setEventContentId(contentId);
-    }
-    
-    @Kroll.method
-    public void setEventContentType(String contentType) {
-        Log.d(TAG, "setEventContentType: " + contentType);
-        mat.setEventContentType(contentType);
-    }
-    
-    @Kroll.method
-    public void setEventDate1(String dateString) {
-        
-        SimpleDateFormat sdf = new SimpleDateFormat(MAT_DATE_TIME_FORMAT, Locale.ENGLISH);
-        sdf.setTimeZone(new SimpleTimeZone(SimpleTimeZone.UTC_TIME, "UTC"));
-        
-        Date date;
-        
-        try {
-            date = sdf.parse(dateString);
-            
-            mat.setEventDate1(date);
-        } catch (ParseException e) {
-            e.printStackTrace();
-        }
-    }
-    
-    @Kroll.method
-    public void setEventDate2(String dateString) {
-        
-        SimpleDateFormat sdf = new SimpleDateFormat(MAT_DATE_TIME_FORMAT, Locale.ENGLISH);
-        sdf.setTimeZone(new SimpleTimeZone(SimpleTimeZone.UTC_TIME, "UTC"));
-        
-        Date date;
-        
-        try {
-            date = sdf.parse(dateString);
-            
-            mat.setEventDate2(date);
-        } catch (ParseException e) {
-            e.printStackTrace();
-        }
-    }
-    
-    @Kroll.method
-    public void setEventLevel(int level) {
-        mat.setEventLevel(level);
-    }
-    
-    @Kroll.method
-    public void setEventQuantity(int quantity) {
-        
-        mat.setEventQuantity(quantity);
-    }
-    
-    @Kroll.method
-    public void setEventRating(int rating) {
-        mat.setEventRating(rating);
-    }
-
-    @Kroll.method
-    public void setEventSearchString(String searchString) {
-        mat.setEventSearchString(searchString);
     }
     
     /////////////////////////////////
@@ -420,6 +264,70 @@ public class MobileapptrackerModule extends KrollModule {
         // no-op
     }
     
+    private MATEvent convertToMATEvent(KrollDict krollEvent) {
+        if (krollEvent == null || krollEvent.isEmpty() || !krollEvent.containsKeyAndNotNull("eventName")) {
+            return null;
+        }
+        
+        // Only event name is required field
+        MATEvent event = new MATEvent(krollEvent.getString("eventName"));
+        if (krollEvent.containsKeyAndNotNull("revenue")) {
+            event.withRevenue(krollEvent.getDouble("revenue"));
+        }
+        if (krollEvent.containsKeyAndNotNull("currencyCode")) {
+            event.withCurrencyCode(krollEvent.getString("currencyCode"));
+        }
+        if (krollEvent.containsKeyAndNotNull("advertiserRefId")) {
+            event.withAdvertiserRefId(krollEvent.getString("advertiserRefId"));
+        }
+        if (krollEvent.containsKeyAndNotNull("contentId")) {
+            event.withContentId(krollEvent.getString("contentId"));
+        }
+        if (krollEvent.containsKeyAndNotNull("contentType")) {
+            event.withContentType(krollEvent.getString("contentType"));
+        }
+        if (krollEvent.containsKeyAndNotNull("date1")) {
+            event.withDate1(new Date(Math.round(krollEvent.getDouble("date1"))));
+        }
+        if (krollEvent.containsKeyAndNotNull("date2")) {
+            event.withDate2(new Date(Math.round(krollEvent.getDouble("date2"))));
+        }
+        if (krollEvent.containsKeyAndNotNull("level")) {
+            event.withLevel(krollEvent.getInt("level"));
+        }
+        if (krollEvent.containsKeyAndNotNull("quantity")) {
+            event.withQuantity(krollEvent.getInt("quantity"));
+        }
+        if (krollEvent.containsKeyAndNotNull("rating")) {
+            event.withRating(krollEvent.getDouble("rating"));
+        }
+        if (krollEvent.containsKeyAndNotNull("searchString")) {
+            event.withSearchString(krollEvent.getString("searchString"));
+        }
+        if (krollEvent.containsKeyAndNotNull("attribute1")) {
+            event.withAttribute1(krollEvent.getString("attribute1"));
+        }
+        if (krollEvent.containsKeyAndNotNull("attribute2")) {
+            event.withAttribute2(krollEvent.getString("attribute2"));
+        }
+        if (krollEvent.containsKeyAndNotNull("attribute3")) {
+            event.withAttribute3(krollEvent.getString("attribute3"));
+        }
+        if (krollEvent.containsKeyAndNotNull("attribute4")) {
+            event.withAttribute4(krollEvent.getString("attribute4"));
+        }
+        if (krollEvent.containsKeyAndNotNull("attribute5")) {
+            event.withAttribute5(krollEvent.getString("attribute5"));
+        }
+        if (krollEvent.containsKeyAndNotNull("receipt") && krollEvent.containsKeyAndNotNull("receiptSignature")) {
+            event.withReceipt(krollEvent.getString("receipt"), krollEvent.getString("receiptSignature"));
+        }
+        if (krollEvent.containsKeyAndNotNull("eventItems")) {
+            event.withEventItems(convertToMATEventItems((Object[])krollEvent.get("eventItems")));
+        }
+        return event;
+    }
+    
     private List<MATEventItem> convertToMATEventItems(Object[] arrItemMaps) {
         List<MATEventItem> listItems = new ArrayList<MATEventItem>();
 
@@ -465,7 +373,15 @@ public class MobileapptrackerModule extends KrollModule {
                     attribute5 = item.getString("attribute_sub5");
                 }
 
-                MATEventItem eventItem = new MATEventItem(itemName, quantity, unitPrice, revenue, attribute1, attribute2, attribute3, attribute4, attribute5);
+                MATEventItem eventItem = new MATEventItem(itemName)
+                        .withQuantity(quantity)
+                        .withUnitPrice(unitPrice)
+                        .withRevenue(revenue)
+                        .withAttribute1(attribute1)
+                        .withAttribute2(attribute2)
+                        .withAttribute3(attribute3)
+                        .withAttribute4(attribute4)
+                        .withAttribute5(attribute5);
                 listItems.add(eventItem);
             }
         } catch (JSONException e) {
